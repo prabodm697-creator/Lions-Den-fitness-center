@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDF</title>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="website icon" href="p13.png">
+    
+</head>
+<body>
+
+
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="logo">LION'S  DEN</a>
+        <div class="menu-toggle" id="mobile-menu">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#transformations">Transformations</a></li>
+            <li><a href="#pricing">Membership</a></li>
+            <li><a href="#training">Personal Training</a></li>
+            <li><a href="#shop">Shop</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="reveal">Forge Your <span style="color:var(--primary-color)">Legacy</span></h1>
+        <p class="reveal">Join the elite gym designed for champions.</p>
+        <a href="#pricing" class="btn reveal">Join Now</a>
+        
+        <a href="#about" class="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-header reveal">
+            <h2>About <span>Us</span></h2>
+            <div style="width: 50px; height: 3px; background: var(--primary-color); margin: 0 auto;"></div>
+        </div>
+        <div class="about-content">
+            <div class="about-img reveal">
+                <img src="gy.png" alt="Gym Interior">
+            </div>
+            <div class="about-text reveal">
+                <h3>More Than Just A Gym</h3>
+                <p>The Lion's Den Gym is a long-established gym in Athens, Alabama, open 24/7/365, with a large facility and a wide range of strength and cardio equipment for all fitness levels..</p>
+                
+                <a href="#contact" class="btn">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <div class="section-header reveal">
+            <h2>Our <span>Services</span></h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card reveal">
+                <i class="fas fa-dumbbell service-icon"></i>
+                <h3>Weight Training</h3>
+                <img src="waight.jpg">
+                
+          
+            </div>
+            <div class="service-card reveal">
+                <i class="fas fa-heartbeat service-icon"></i>
+                <h3>Cardio Zone</h3>
+                <img src="cardio.jpeg">
+                
+            </div>
+       
+            <div class="service-card reveal">
+                <i class="fas fa-apple-alt service-icon"></i>
+                <h3>Nutrition Plans</h3>
+                <img src="nutrition.webp">
+           
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Client Transformation Section (Animated Scroll & Zoom) -->
+    <section id="transformations" style="background-color: #0a0a0a;">
+        <div class="section-header reveal">
+            <h2>Client <span>Transformations</span></h2>
+           <h3> <p style="color: #888;">view photos </p></h3>
+        </div>
+
+<center>
+<a href="index2.html" target="blank"
+   style="background-color: #00bdf6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; ">
+   Click Here
+
+</a>
+</center>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="Zoomed Image">
+    </div>
+
+    <!-- Membership Pricing -->
+    <section id="pricing">
+        <div class="section-header reveal">
+            <h2>Gym <span>Membership</span></h2>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card reveal">
+                <h3>MEN /19 +</h3>
+                <div class="price">Rs 3000<span>/mo</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> admition fee Rs 1000</li>
+                    <li><i class="fas fa-check"></i> Work Out plan</li>
+                    <li><i class="fas fa-check"></i> nutrition Guide</li>
+
+                </ul>
+                <a href="#contact" class="btn" style="margin-top:1rem; width:100%">Choose Plan</a>
+            </div>
+
+            <div class="pricing-card  reveal">
+                <h3>MEN /19-</h3>
+                <div class="price">Rs 2500<span>/mo</span></div>
+                <ul class="pricing-features">
+                      <li><i class="fas fa-times" style="color:#555"></i> no  admition fee</li>
+                     <li><i class="fas fa-check"></i> Work Out plan</li>
+                    <li><i class="fas fa-check"></i> Nutrition Guide</li>
+
+                </ul>
+                <a href="#contact" class="btn" style="margin-top:1rem; width:100%">Choose Plan</a>
+            </div>
+
+            <div class="pricing-card reveal">
+                <h3>WOMEN</h3>
+                <div class="price">Rs 2500<span>/mo</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> admition fee Rs 1000</li>
+                     <li><i class="fas fa-check"></i> Work Out plan</li>
+                    <li><i class="fas fa-check"></i> Nutrition Guide</li>
+
+                </ul>
+                <a href="#contact" class="btn" style="margin-top:1rem; width:100%">Choose Plan</a>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Personal Training Packages -->
+    <section id="training" style="background-color: #0a0a0a;">
+        <div class="section-header reveal">
+            <h2>Personal <span>Training</span></h2>
+        </div>
+        <div class="pt-grid">
+
+            
+            <!-- Package 1 -->
+            <div class="pt-card reveal">
+                <div class="pt-img">
+                    <img src="p11.jpg" alt="Premium">
+                </div>
+                <div class="pt-details">
+                    
+                    <ul>
+                        <li> ✔️ 1 Month Service</li>
+                        <li> ✔️ Custom Meal & Workout Plan</li>
+                        <li> ✔️ Weekly Progress Check-ins</li>
+                         <li> ✔️ High Attention Coaching</li>
+                          <li> ✔️ 24–48 Hour WhatsApp Support</li>
+                    </ul>
+                    <div class="pt-price">Rs.9999</div>
+                    <button class="btn" onclick="buyPT('Premium', 'Rs.9999')">Buy via WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- Package 2 -->
+            <div class="pt-card reveal">
+                <div class="pt-img">
+                    <img src="p12.jpg" alt="Gold">
+                </div>
+                <div class="pt-details">
+                    
+                    <ul>
+                        <li> ✔️ 1 Month Personal Training</li>
+                        <li> ✔️ Personalized Meal & Training Plan</li>
+                        <li> ✔️ Progress Check-ins (Every 2 Weeks)</li>
+                         <li> ✔️ Supplement Guidance</li>
+                          <li> ✔️ 48–72 Hour WhatsApp Support</li>
+                    </ul>
+                    <div class="pt-price">Rs.7500</div>
+                    <button class="btn" onclick="buyPT('Gold', 'Rs.7500')">Buy via WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- Package 3 -->
+            <div class="pt-card reveal">
+                <div class="pt-img">
+                    <img src="p10.jpg" alt="Bronze">
+                </div>
+                <div class="pt-details">
+                    
+                    <ul>
+                        <li> ✔️ 1 Month Personal Training</li>
+                        <li> ✔️ Personalized Meal & Workout Plan</li>
+                        <li> ✔️ Monthly Progress Check-inl</li>
+                         <li> ✔️ Supplement Guidance</li>
+                          <li> ✔️ 72 Hour WhatsApp Support</li>
+                    </ul>
+                    <div class="pt-price">Rs.5000</div>
+                    <button class="btn" onclick="buyPT('Bronze', 'Rs.5000')">Buy via WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- Package 4 -->
+            <div class="pt-card reveal">
+                <div class="pt-img">
+                    <img src="p9.jpg" alt="Basic">
+                </div>
+                <div class="pt-details">
+                
+                    <ul>
+                        <li> ✔️ 1 Month Service</li>
+                        <li> ✔️ Meal Plan or Workout Plan</li>
+                        <li> ✔️ Custom Plan Based on Goal</li>
+                         <li> ✔️ Supplement Guidance</li>
+                          <li> ✔️ 48–72 Hour WhatsApp Support</li>
+                    </ul>
+                    <div class="pt-price">Rs.3000</div>
+                    <button class="btn" onclick="buyPT('Basic', 'Rs.3000')">Buy via WhatsApp</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+    <!-- Shop / Merch Section -->
+    <section id="shop">
+        <div class="section-header reveal">
+            <h2>Gym <span>Merch</span></h2>
+        </div>
+        <div class="merch-container reveal">
+            <div class="merch-img">
+                <img src="shirt2.png" alt="Gym T-Shirt">
+            </div>
+            <div class="merch-info">
+                <h3>Official "LD Family" T-Shirt</h3>
+                <p style="margin-bottom:1rem; color:#ccc;">
+                                        ✔️ Soft & breathable fabric<br>
+                                        ✔️ Long-lasting print quality<br>
+                                        ✔️ Comfortable fit for all-day wear<br><br>
+
+                                            🛒 **Order now** and get your favorite design delivered straight to your door!</p>
+                <p>
+                    <span class="old-price">Rs.4000</span>
+                    <span class="new-price">Rs.3000</span>
+                </p>
+                <button class="btn" style="margin-top:1.5rem;" onclick="buyMerch()">Buy Shirt via WhatsApp</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Contact Section -->
+    <footer id="contact" class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>About LION'S DEN</h4>
+                <p>We are dedicated to helping you reach your peak physical potential. Join us today.</p>
+                <div class="social-icons" style="margin-top: 1rem;">
+                    <a href="https://www.facebook.com/LionsDenFitnessAlawwa?mibextid=LQQJ4d" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/ldf.itness_alawwa?igsh=MXZ4bjZzZGc2M3ZrZA%3D%3D&utm_source=qr" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com/@LionsDenFitnessCenter?si=8HeA8gY2kLXcefIW" target="_blank"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><i class="fas fa-map-marker-alt"></i> address</p>
+                <p><i class="fas fa-phone"></i> 0740802427</p>
+                <p><i class="fas fa-envelope"></i> lionsden@gmail.com</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Location</h4>
+                <div class="map-container">
+                    <!-- Embedded Google Map Placeholder -->
+                    <iframe src="https://maps.app.goo.gl/sy1JVJB5xa94Mx9i9" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+<footer style="background-color: black; padding: 20px; text-align: center;">
+    <div class="footer-container">
+
+        <span class="footer-text">© 2026 LION'S DEN GYM . All Rights Reserved. design By prabod</span>
+
+                <a href="https://www.instagram.com/_prabod_?igsh=cXgxZWc2MDNkbjg0&utm_source=qr" target="_blank" class="insta-link">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+    </div>
+</footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

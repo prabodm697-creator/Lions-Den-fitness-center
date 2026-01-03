@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Gallery </title>
+    <style>
+        /* --- 1. BASIC PAGE STYLES --- */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #131212;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #f6f5f5;
+            text-transform: uppercase;
+            font-size: 2rem;
+        }
+
+        .section-title2{
+            color: #00bdf6;
+        }
+
+        /* --- 2. GALLERY GRID LAYOUT (Responsive) --- */
+        .photo-gallery {
+            display: grid;
+            /* This line makes it responsive automatically */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- 3. PHOTO ITEM STYLING --- */
+        .photo-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer; /* Indicates it is clickable */
+            aspect-ratio: 1 / 1; /* Makes all images square (optional) */
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image fills the square without stretching */
+            transition: transform 0.3s ease, filter 0.3s ease;
+            display: block;
+        }
+
+        /* Hover Effect: Slight zoom and brightness increase */
+        .photo-item:hover img {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+        }
+
+        /* --- 4. LIGHTBOX (ZOOM MODAL) --- */
+        .lightbox {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9); /* Dark overlay */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 85vh; /* Don't let it be taller than the screen */
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            animation: fadeIn 0.3s;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-btn:hover { color: #ff4757; }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1 class="section-title">Our <span class="section-title2">client</span></h1>
+
+    <!-- PHOTO GALLERY SECTION START -->
+    <div class="photo-gallery">
+
+        <!-- Photo 1 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <!-- Replace src with your image URL -->
+            <img src="client1.png" alt="Gym Photo 1">
+        </div>
+
+        <!-- Photo 2 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <img src="client2.png" alt="Gym Photo 2">
+        </div>
+
+        <!-- Photo 3 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <img src="client3.png" alt="Gym Photo 3">
+        </div>
+
+        <!-- Photo 4 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <img src="client4.png" alt="Gym Photo 4">
+        </div>
+
+        <!-- Photo 5 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <img src="client6.png" alt="Gym Photo 5">
+        </div>
+
+        <!-- Photo 6 -->
+        <div class="photo-item" onclick="openZoom(this)">
+            <img src="client7.png" alt="Gym Photo 6">
+        </div>
+
+    </div>
+    <!-- PHOTO GALLERY SECTION END -->
+
+
+    <!-- LIGHTBOX (HIDDEN BY DEFAULT) -->
+    <div id="lightbox" class="lightbox" onclick="closeZoom()">
+        <span class="close-btn" onclick="closeZoom()">&times;</span>
+        <img id="zoomed-img" src="" onclick="event.stopPropagation()"> 
+        <!-- event.stopPropagation() prevents closing when clicking the image itself -->
+    </div>
+
+    <script>
+        // Get the lightbox elements
+        const lightbox = document.getElementById('lightbox');
+        const zoomedImg = document.getElementById('zoomed-img');
+
+        // Function to open zoom
+        function openZoom(element) {
+            // Get the image inside the clicked div
+            const img = element.querySelector('img');
+            // Set the lightbox image source to the clicked image
+            zoomedImg.src = img.src;
+            // Show the lightbox (display: flex)
+            lightbox.style.display = 'flex';
+        }
+
+        // Function to close zoom
+        function closeZoom() {
+            lightbox.style.display = 'none';
+        }
+
+        // Optional: Close lightbox when pressing Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeZoom();
+            }
+        });
+    </script>
+
+</body>
+</html>
