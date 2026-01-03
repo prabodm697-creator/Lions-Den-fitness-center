@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Library</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --primary: #00bdf6; /* Energetic Red */
+            --text-main: #ffffff;
+            --text-muted: #a4b0be;
+            --border: #2f3542;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- LOCK SCREEN OVERLAY --- */
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .lock-box {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .lock-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .lock-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            background: #2f3542;
+            border: 1px solid #57606f;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .lock-input:focus {
+            border-color: var(--primary);
+        }
+
+        .unlock-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .unlock-btn:hover {
+            transform: scale(1.02);
+            background-color: #0b9fc8;
+        }
+
+        #error-msg {
+            color: #ff4757;
+            margin-top: 10px;
+            font-size: 14px;
+            height: 20px;
+        }
+
+        /* --- MAIN PAGE CONTENT (Hidden initially) --- */
+        #page-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Header & Search */
+        header {
+            padding: 20px 5%;
+            background-color: rgba(18, 18, 18, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+        .brand span { color: var(--primary); }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 10px 40px 10px 15px;
+            border-radius: 25px;
+            color: white;
+            width: 250px;
+            outline: none;
+            transition: width 0.3s;
+        }
+
+        .search-input:focus {
+            width: 300px;
+            border-color: var(--primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* Featured Section */
+        .hero {
+            padding: 40px 5%;
+            text-align: center;
+        }
+        
+        .hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .hero p { color: var(--text-muted); margin-bottom: 30px; }
+
+        /* Video Grid */
+        .video-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 0 5% 50px 5%;
+        }
+
+        .video-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 160px;
+            background-color: #000;
+            position: relative;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .video-card:hover .thumbnail img { opacity: 1; }
+
+        .play-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+        }
+        
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .card-info {
+            padding: 15px;
+        }
+
+        .card-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--primary);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            margin: 5px 0;
+            font-weight: 600;
+        }
+
+        .card-duration {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* --- VIDEO PLAYER MODAL --- */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            background: black;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive */
+        @media(max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .search-input { width: 100%; }
+            .search-input:focus { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD LOCK SCREEN -->
+    <div id="lock-screen">
+        <div class="lock-box">
+            <div class="lock-icon">🔒</div>
+            <h2 style="margin-bottom: 10px;">MEMBERS ONLY</h2>
+            <p style="color: #777; font-size: 14px; margin-bottom: 20px;">Enter Access Code</p>
+            <input type="password" id="password-input" class="lock-input" placeholder="Password">
+            <button id="unlock-btn" class="unlock-btn">UNLOCK GYM</button>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- MAIN SITE CONTENT -->
+    <div id="page-content">
+        <header>
+            <div class="brand">IRON<span>GYM</span></div>
+            
+            <div class="search-wrapper">
+                <input type="text" id="search-input" class="search-input" placeholder="Search exercises...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </header>
+
+        <section class="hero">
+            <h1>Exercise Video Library</h1>
+            <p>Click on any card to watch the full workout tutorial.</p>
+        </section>
+
+        <div id="video-grid" class="video-gallery">
+            <!-- Videos injected via JS -->
+        </div>
+    </div>
+
+    <!-- VIDEO PLAYER MODAL -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="video-wrapper">
+                <iframe id="player-frame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA: List of Exercises ---
+        // Using placeholder YouTube IDs for demonstration
+        const videoData = [
+            { id: 1, title: " Push Ups", category: "Chest", duration: "10:00", img: "https://picsum.photos/seed/pushup/400/250", videoId: "IODxDxX7oi4" },
+            { id: 4, title: "Heavy Squat Form", category: "Legs", duration: "12:20", img: "https://picsum.photos/seed/squat/400/250", videoId: "SW_C1A-rejs" },
+            { id: 7, title: "Deadlift Technique", category: "Back", duration: "14:00", img: "https://picsum.photos/seed/dead/400/250", videoId: "op9kVnSso6Q" },
+
+
+            
+            
+        ];
+
+        // --- DOM ELEMENTS ---
+        const lockScreen = document.getElementById('lock-screen');
+        const pageContent = document.getElementById('page-content');
+        const passInput = document.getElementById('password-input');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const errorMsg = document.getElementById('error-msg');
+        
+        const gridContainer = document.getElementById('video-grid');
+        const searchInput = document.getElementById('search-input');
+        
+        const modal = document.getElementById('video-modal');
+        const playerFrame = document.getElementById('player-frame');
+        const closeModal = document.querySelector('.close-modal');
+
+        // --- PASSWORD LOGIC ---
+        const SECRET_CODE = "LDF0701#";
+
+        unlockBtn.addEventListener('click', () => {
+            if(passInput.value === SECRET_CODE) {
+                // Success
+                lockScreen.style.opacity = '0';
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    pageContent.style.display = 'block';
+                    setTimeout(() => pageContent.style.opacity = '1', 50);
+                }, 500);
+            } else {
+                // Error
+                errorMsg.textContent = "Access Denied: Wrong Password";
+                passInput.style.borderColor = "#ff4757";
+                passInput.value = "";
+                passInput.focus();
+            }
+        });
+
+        // Allow Enter key to submit password
+        passInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') unlockBtn.click();
+        });
+
+        // --- RENDER FUNCTION ---
+        function renderVideos(videos) {
+            gridContainer.innerHTML = "";
+            
+            if(videos.length === 0) {
+                gridContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777;">No videos found.</p>`;
+                return;
+            }
+
+            videos.forEach(vid => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <div class="thumbnail">
+                        <img src="${vid.img}" alt="${vid.title}">
+                        <div class="play-overlay">
+                            <div class="play-btn">▶</div>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-tag">${vid.category}</div>
+                        <div class="card-title">${vid.title}</div>
+                        <div class="card-duration">⏱ ${vid.duration}</div>
+                    </div>
+                `;
+                
+                // Add Click Event to Open Modal
+                card.addEventListener('click', () => openVideo(vid));
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // --- SEARCH LOGIC ---
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = videoData.filter(v => 
+                v.title.toLowerCase().includes(term) || 
+                v.category.toLowerCase().includes(term)
+            );
+            renderVideos(filtered);
+        });
+
+        // --- MODAL PLAYER LOGIC ---
+        function openVideo(video) {
+            // Set iframe source to YouTube Embed
+            playerFrame.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+            modal.style.display = 'flex';
+        }
+
+        function closeVideo() {
+            modal.style.display = 'none';
+            playerFrame.src = ""; // Stop audio/video
+        }
+
+        closeModal.addEventListener('click', closeVideo);
+        
+        // Close if clicking outside video
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeVideo();
+            }
+        }
+
+        // Initial Render
+        renderVideos(videoData);
+
+    </script>
+</body>
+</html>
