@@ -73,6 +73,25 @@
             letter-spacing: 1px;
         }
 
+        
+
+
+        .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 120px;
+        }
+
+        .logo {
+        width: 250px;
+        height:250px;
+        object-fit: contain;
+        }
+
+
+
+
+
         .nav-links {
             display: flex;
             gap: 2rem;
