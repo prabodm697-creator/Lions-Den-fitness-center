@@ -124,7 +124,7 @@
         </div>
 
 <center>
-<a href="index2.html" target="blank"
+<a href="galary.html" target="blank"
    style="background-color: #00bdf6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; ">
    Click Here
 
@@ -311,6 +311,63 @@
 
 
 
+     <div class="calculator-card">
+        <header>
+
+        <div class="section-header reveal">
+            <h1>MBI  <span>Calculator</span></h1>
+             <p class="subtitle">Check your Body Mass Index</p>
+        </div>
+
+          
+        </header>
+
+        <!-- Unit Toggle -->
+        <div class="unit-toggle">
+            <button class="toggle-btn active" id="btn-metric" onclick="setUnit('metric')">Metric</button>
+            <button class="toggle-btn" id="btn-imperial" onclick="setUnit('imperial')">Imperial</button>
+        </div>
+
+        <!-- Inputs -->
+        <div class="input-section">
+            <!-- Height Input -->
+            <div class="input-group">
+                <div class="label-row">
+                    <label for="height">Height</label>
+                    <span class="value-display"><span id="height-val">170</span><span id="height-unit">cm</span></span>
+                </div>
+                <input type="range" id="height" min="100" max="220" value="170">
+            </div>
+
+            <!-- Weight Input -->
+            <div class="input-group">
+                <div class="label-row">
+                    <label for="weight">Weight</label>
+                    <span class="value-display"><span id="weight-val">70</span><span id="weight-unit">kg</span></span>
+                </div>
+                <input type="range" id="weight" min="30" max="150" value="70">
+            </div>
+        </div>
+
+        <!-- Animated Result -->
+        <div class="gauge-container">
+            <div class="gauge-bg"></div>
+            <div class="gauge-fill" id="gauge-fill"></div>
+            <div class="needle" id="needle"></div>
+        </div>
+
+        <div class="result-overlay">
+            <div class="mbi-value" id="mbi-number">0.0</div>
+            <span class="mbi-label" id="mbi-category">Normal</span>
+            <p class="mbi-desc" id="mbi-desc">Your weight is within the healthy range.</p>
+        </div>
+
+
+    </div>
+
+
+
+
 
 
 
@@ -329,18 +386,37 @@
                 </div>
             </div>
 
+
+            
+
             <div class="footer-col">
                 <h4>Contact Us</h4>
                 <p><i class="fas fa-map-marker-alt"></i> address</p>
-                <p><i class="fas fa-phone"></i> 0740802427</p>
+                <p><i class="fas fa-phone"></i> +94 71 262 8585</p>
                 <p><i class="fas fa-envelope"></i> lionsden@gmail.com</p>
             </div>
+
+
+            
+            <div class="footer-col">
+                <h4>Opening Hours ⏰</h4>
+                
+                <p>Open  Time 5.00am- 10.30pm</p>
+       
+            </div>
+
+
+    
+
+
 
             <div class="footer-col">
                 <h4>Location</h4>
                 <div class="map-container">
+                                        <!-- Using a generic map-like image from picsum -->
+                    <img src="https://lh3.googleusercontent.com/VKEIvvokZHFk7Sw1pNk9VChgkXzN_Jz8oYr5JHIK4qeHZtCDwDUuy_qh6O4S3Qb2oyGe6kBSvmOw5xlDguenjeENosM8TTfDUsZvIeY=w609" alt="Map Location Area" class="map-placeholder-img">
                     <!-- Embedded Google Map Placeholder -->
-                    <iframe src="https://maps.app.goo.gl/sy1JVJB5xa94Mx9i9" allowfullscreen="" loading="lazy"></iframe>
+                                  <a href="https://www.google.com/maps/place/Lion's+Den+FITNESS/@7.2919296,80.2400701,17z/data=!4m14!1m7!3m6!1s0x3ae319a50854a14d:0xee93c920a798f7b6!2sLion's+Den+FITNESS!8m2!3d7.2919296!4d80.2400701!16s%2Fg%2F11j2v6jxcf!3m5!1s0x3ae319a50854a14d:0xee93c920a798f7b6!8m2!3d7.2919296!4d80.2400701!16s%2Fg%2F11j2v6jxcf?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D" target="_blank" class="map-overlay-btn">Open in Google Maps</a>
                 </div>
             </div>
         </div>
