@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriForce - Premium Supplements</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00bdf6; /* Energetic Orange */
+            --primary-hover: #13239c;
+            --secondary: #4b476e; /* Dark Blue-Grey */
+            --accent: #27ae60; /* Success Green */
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+            --text-dark: #333333;
+            --text-light: #777777;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 69, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }
+        }
+
+        /* --- Header & Navigation --- */
+        header {
+            background: var(--white);
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-right: 45px;
+            border-radius: 50px;
+            border: 2px solid #eee;
+            background: #f9f9f9;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .search-container input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.1);
+        }
+
+        .search-container i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(135deg, var(--secondary) 0%, #1a252f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10%;
+            margin-top: 60px;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-text {
+            max-width: 50%;
+            z-index: 2;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-text span {
+            color: var(--primary);
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .cta-btn {
+            padding: 15px 40px;
+            background: var(--primary);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-block;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+        }
+
+        .cta-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.4);
+        }
+
+        .hero-image {
+            max-width: 45%;
+            z-index: 2;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-image img {
+            width: 100%;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+        }
+
+        /* --- Filter Section --- */
+        .filters {
+            padding: 40px 5%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 25px;
+            border: 2px solid var(--secondary);
+            border-radius: 30px;
+            background: transparent;
+            color: var(--secondary);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        /* --- Products Grid --- */
+        .products-section {
+            padding: 0 5% 60px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0; /* Starts hidden for animation */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .product-image-container {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image-container img {
+            transform: scale(1.1);
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--accent);
+            color: var(--white);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .product-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-category {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .product-actions {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: #eee;
+            color: var(--secondary);
+        }
+
+        .btn-view:hover {
+            background: #ddd;
+        }
+
+        .btn-buy {
+            background: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-buy:hover {
+            background: #1a252f;
+        }
+
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--white);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.8);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        @media(min-width: 768px) {
+            .modal-content {
+                flex-direction: row;
+            }
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.1);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(0,0,0,0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-image {
+            flex: 1;
+            min-height: 250px;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-details {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .modal-details h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .modal-rating {
+            color: #f1c40f;
+            margin-bottom: 20px;
+        }
+
+        .modal-description {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-specs {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .modal-specs li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-specs i {
+            color: var(--accent);
+        }
+
+        .modal-price {
+            font-size: 2rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* --- Order Modal (Form) --- */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .whatsapp-btn {
+            width: 100%;
+            padding: 15px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 40px 5%;
+            text-align: center;
+        }
+
+        .social-icons {
+            margin: 20px 0;
+        }
+
+        .social-icons a {
+            color: var(--white);
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--secondary);
+            color: var(--white);
+            padding: 12px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 3000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast i {
+            color: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column-reverse;
+                text-align: center;
+                justify-content: center;
+                height: auto;
+                padding: 40px 5%;
+            }
+            .hero-text, .hero-image {
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            .search-container {
+                display: none; /* In a real app, use a toggle */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-dumbbell"></i> SUPLIMENT
+        </div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for protein, vitamins...">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="cart-icon" style="font-size: 1.2rem; cursor: pointer;">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Unlock Your <span>Potential</span> With Premium Supplements</h1>
+            <p>Scientifically formulated to boost energy, build muscle, and improve recovery. Join thousands of athletes trusting NutriForce.</p>
+            <a href="#products" class="cta-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="hero-image">
+            <!-- Placeholder using Picsum with a fitness-like seed -->
+            <img src="https://supplementsuperstores.com/cdn/shop/files/WASHINGTONSTORE-2.jpg?v=1730478994&width=3840" alt="Supplements">
+        </div>
+    </section>
+
+    <!-- Filter Categories -->
+    <section class="filters" id="filters">
+        <button class="filter-btn active" data-category="all">All Products</button>
+        <button class="filter-btn" data-category="protein">Protein</button>
+        <button class="filter-btn" data-category="vitamins">Vitamins</button>
+        <button class="filter-btn" data-category="preworkout">Pre-Workout</button>
+        <button class="filter-btn" data-category="fatburner">Fat Burner</button>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products-section" id="products">
+        <h2 class="section-title">Our Best Sellers</h2>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products injected by JS -->
+        </div>
+    </section>
+
+    <!-- View Product Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
+            <div class="modal-image">
+                <img id="viewModalImg" src="" alt="Product Detail">
+            </div>
+            <div class="modal-details">
+                <span id="viewModalCat" class="product-category">Category</span>
+                <h2 id="viewModalTitle">Product Name</h2>
+                <div class="modal-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <span style="color: #999; font-size: 0.9rem;">(4.8)</span>
+                </div>
+                <p id="viewModalDesc" class="modal-description">Description goes here...</p>
+                <ul class="modal-specs">
+                    <li><i class="fas fa-check-circle"></i> <span>Pure Ingredients</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span>Lab Tested</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span>Fast Results</span></li>
+                </ul>
+                <div id="viewModalPrice" class="modal-price">$0.00</div>
+                <button class="btn btn-buy" id="viewModalBuyBtn" style="padding: 15px;">
+                    Buy Now <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy Modal (Form) -->
+    <div class="modal-overlay" id="buyModal">
+        <div class="modal-content" style="max-width: 500px; flex-direction: column;">
+            <button class="modal-close" onclick="closeModal('buyModal')">&times;</button>
+            <div style="padding: 40px;">
+                <h2 style="margin-bottom: 20px; color: var(--secondary);">Complete Order</h2>
+                <p style="margin-bottom: 20px; color: #777;">Send your order details directly to our sales team via WhatsApp.</p>
+                
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <strong>Product:</strong> <span id="buyModalProductName">--</span><br>
+                    <strong>Price:</strong> <span id="buyModalProductPrice">--</span>
+                </div>
+
+                <form id="orderForm" onsubmit="handleOrder(event)">
+                    <input type="hidden" id="productNameInput">
+                    <input type="hidden" id="productPriceInput">
+                    
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="customerName" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Delivery Address</label>
+                        <textarea id="customerAddress" rows="3" placeholder="Street, City, Zip Code" required></textarea>
+                    </div>
+
+                    <button type="submit" class="whatsapp-btn">
+                        <i class="fab fa-whatsapp"></i> Send Order via WhatsApp
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action Successful</span>
+    </div>
+
+    <footer>
+      
+        
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+        <p>&copy;  All rights reserved.</p>
+    </footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        // --- Data ---
+        const products = [
+            {
+                id: 1,
+                name: "Whey Protein I",
+                category: "protein",
+                price: "Rs.5000.00",
+                image: "https://i5.walmartimages.com/seo/Dymatize-ISO100-Hydrolyzed-Whey-Isolate-Protein-Powder-Chocolate-Peanut-Butter-25g-Protein-5-lb_ed3fa42e-6f5b-4722-8960-141bd7e7bf31.3954708f52583cf9b8e2269eb8607193.jpeg",
+                description: "Pure whey protein isolate for maximum muscle recovery and growth. Low lactose, high BCAA content."
+            },
+            {
+                id: 2,
+                name: "Creatine Monohydrate",
+                category: "preworkout",
+                price: "$29.99",
+                image: "https://fitnessisland.lk/cdn/shop/files/image-removebg-preview_8_a25ce381-91a5-4aea-93fc-74a81caaca22.png?v=1690782041",
+                description: "Boost strength and power output. Micronized for easy mixing and rapid absorption."
+            },
+            {
+                id: 3,
+                name: "Multivitamin Complex",
+                category: "vitamins",
+                price: "$19.99",
+                image: "https://images-cdn.ubuy.co.in/650c586779f9075bdd1cea51-herbalife-formula-2-multivitamin.jpg",
+                description: "Complete daily nutrition support. Packed with essential vitamins and minerals for immune health."
+            },
+            {
+                id: 4,
+                name: "Thermogenic Fat Burner",
+                category: "fatburner",
+                price: "$39.99",
+                image: "https://www.jackedfactory.com/cdn/shop/files/BurnXT_60_Front_1.jpg?v=1749586468&width=2568",
+                description: "Accelerate metabolism and burn calories efficiently. Natural energy boost without the crash."
+            },
+ 
+            {
+                id: 6,
+                name: "Omega-3 Fish Oil",
+                category: "vitamins",
+                price: "$24.99",
+                image: "https://cosmetics.lk/cdn/shop/files/NW002.webp?v=1752220628",
+                description: "Supports heart health and joint function. High potency EPA and DHA capsules."
+            },
+            {
+                id: 7,
+                name: "Pre-Workout Ignite",
+                category: "preworkout",
+                price: "$34.99",
+                image: "https://shop.burnbootcamp.com/cdn/shop/files/N-I-PCS_001_grande.jpg?v=1726015483",
+                description: "Explosive energy and focus. Contains caffeine, beta-alanine, and nitric oxide boosters."
+            },
+         
+        ];
+
+        // --- Configuration ---
+        const ADMIN_WHATSAPP = "1234567890"; // Replace with real Admin Number
+
+        // --- DOM Elements ---
+        const productsGrid = document.getElementById('productsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        
+        // Modal Elements
+        const viewModal = document.getElementById('viewModal');
+        const buyModal = document.getElementById('buyModal');
+        const toast = document.getElementById('toast');
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts(products);
+            
+            // Search Listener
+            searchInput.addEventListener('input', (e) => {
+                const keyword = e.target.value.toLowerCase();
+                const filtered = products.filter(p => 
+                    p.name.toLowerCase().includes(keyword) || 
+                    p.category.toLowerCase().includes(keyword)
+                );
+                renderProducts(filtered);
+            });
+
+            // Category Filter Listeners
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active class
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Filter logic
+                    const category = btn.getAttribute('data-category');
+                    if (category === 'all') {
+                        renderProducts(products);
+                    } else {
+                        const filtered = products.filter(p => p.category === category);
+                        renderProducts(filtered);
+                    }
+                });
+            });
+        });
+
+        // --- Render Function ---
+        function renderProducts(data) {
+            productsGrid.innerHTML = '';
+            
+            if (data.length === 0) {
+                productsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #777;">No products found.</p>';
+                return;
+            }
+
+            data.forEach((product, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                // Staggered animation delay
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                card.innerHTML = `
+                    <div class="product-image-container">
+                        <span class="badge">${product.category}</span>
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">${product.category}</span>
+                        <h3 class="product-title">${product.name}</h3>
+                        <div class="product-price">${product.price}</div>
+                        <div class="product-actions">
+                            <button class="btn btn-view" onclick="openViewModal(${product.id})">
+                                <i class="far fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-buy" onclick="openBuyModal(${product.id})">
+                                <i class="fas fa-shopping-cart"></i> Buy
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsGrid.appendChild(card);
+            });
+        }
+
+        // --- View Modal Logic ---
+        function openViewModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('viewModalImg').src = product.image;
+            document.getElementById('viewModalCat').textContent = product.category;
+            document.getElementById('viewModalTitle').textContent = product.name;
+            document.getElementById('viewModalDesc').textContent = product.description;
+            document.getElementById('viewModalPrice').textContent = product.price;
+            
+            // Attach event to the buy button inside view modal
+            const buyBtn = document.getElementById('viewModalBuyBtn');
+            buyBtn.onclick = () => {
+                closeModal('viewModal');
+                openBuyModal(id);
+            };
+
+            viewModal.classList.add('active');
+        }
+
+        // --- Buy Modal Logic ---
+        function openBuyModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('buyModalProductName').textContent = product.name;
+            document.getElementById('buyModalProductPrice').textContent = product.price;
+            
+            // Hidden inputs to capture data for the form submission
+            document.getElementById('productNameInput').value = product.name;
+            document.getElementById('productPriceInput').value = product.price;
+
+            buyModal.classList.add('active');
+        }
+
+        // --- Close Modal ---
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal if clicking outside content
+        window.onclick = function(event) {
+            if (event.target == viewModal) closeModal('viewModal');
+            if (event.target == buyModal) closeModal('buyModal');
+        }
+
+        // --- Handle Order (WhatsApp) ---
+        function handleOrder(e) {
+            e.preventDefault();
+
+            const productName = document.getElementById('productNameInput').value;
+            const price = document.getElementById('productPriceInput').value;
+            const name = document.getElementById('customerName').value;
+            const address = document.getElementById('customerAddress').value;
+
+            // Construct WhatsApp Message
+            const message = `Hello, I would like to place an order:%0A%0A` +
+                            `*Product:* ${productName}%0A` +
+                            `*Price:* ${price}%0A%0A` +
+                            `*Customer Details:*%0A` +
+                            `Name: ${name}%0A` +
+                            `Address: ${address}`;
+
+            // Create WhatsApp Link
+            const whatsappURL = `https://wa.me/${ADMIN_WHATSAPP}?text=${message}`;
+
+            // Show success toast and redirect
+            showToast("Redirecting to WhatsApp...");
+            
+            setTimeout(() => {
+                closeModal('buyModal');
+                window.open(whatsappURL, '_blank');
+                // Clear form
+                document.getElementById('orderForm').reset();
+            }, 1500);
+        }
+
+        // --- Toast Notification ---
+        function showToast(msg) {
+            const toastEl = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toastEl.classList.add('active');
+            
+            setTimeout(() => {
+                toastEl.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
