@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Library</title>
+    <title>LDF - Training & Nutrition</title>
     <style>
         /* --- CSS VARIABLES & RESET --- */
         :root {
             --bg-dark: #121212;
-            --bg-card: #1e1e1e;
-            --primary: #00bdf6; /* Energetic Red */
+            --bg-panel: #1e1e1e;
+            --accent-blue: #3498db;  /* For Videos */
+            --accent-green: #2ecc71; /* For Nutrition */
             --text-main: #ffffff;
-            --text-muted: #a4b0be;
-            --border: #2f3542;
+            --text-muted: #95a5a6;
+            --border: #2c3e50;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -28,452 +29,647 @@
             overflow-x: hidden;
         }
 
-        /* --- LOCK SCREEN OVERLAY --- */
+        /* --- LOCK SCREEN --- */
         #lock-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
+            top: 0; left: 0; width: 100%; height: 100vh;
             background-color: #000;
             z-index: 9999;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s;
         }
 
-        .lock-box {
-            background: var(--bg-card);
+        .lock-card {
+            background: var(--bg-panel);
             padding: 40px;
-            border-radius: 10px;
+            border-radius: 12px;
             text-align: center;
-            border: 1px solid var(--primary);
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.3);
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
             width: 90%;
-            max-width: 350px;
-        }
-
-        .lock-icon {
-            font-size: 40px;
-            margin-bottom: 20px;
-            color: var(--primary);
+            max-width: 400px;
         }
 
         .lock-input {
             width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            background: #2f3542;
-            border: 1px solid #57606f;
+            padding: 15px;
+            margin: 20px 0;
+            background: #121212;
+            border: 1px solid var(--border);
             color: white;
-            border-radius: 5px;
+            border-radius: 6px;
+            text-align: center;
             font-size: 16px;
-            outline: none;
-        }
-
-        .lock-input:focus {
-            border-color: var(--primary);
         }
 
         .unlock-btn {
-            background-color: var(--primary);
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-blue);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 16px;
-            width: 100%;
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: 0.3s;
         }
+        .unlock-btn:hover { background: #2980b9; }
 
-        .unlock-btn:hover {
-            transform: scale(1.02);
-            background-color: #0b9fc8;
-        }
+        #lock-error { color: #e74c3c; margin-top: 10px; font-size: 13px; height: 20px; }
 
-        #error-msg {
-            color: #ff4757;
-            margin-top: 10px;
-            font-size: 14px;
-            height: 20px;
-        }
-
-        /* --- MAIN PAGE CONTENT (Hidden initially) --- */
-        #page-content {
+        /* --- MAIN SITE --- */
+        #main-content {
             display: none;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 1s;
+            padding-bottom: 50px;
         }
 
-        /* Header & Search */
         header {
             padding: 20px 5%;
-            background-color: rgba(18, 18, 18, 0.95);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(30,30,30,0.95);
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .brand {
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-        .brand span { color: var(--primary); }
+        .logo { font-size: 28px; font-weight: 800; letter-spacing: 1px; }
+        .logo span { color: var(--accent-blue); }
 
-        .search-wrapper {
+        .search-box {
             position: relative;
         }
-
         .search-input {
-            background: var(--bg-card);
+            background: var(--bg-dark);
             border: 1px solid var(--border);
             padding: 10px 40px 10px 15px;
             border-radius: 25px;
             color: white;
             width: 250px;
             outline: none;
-            transition: width 0.3s;
         }
-
-        .search-input:focus {
-            width: 300px;
-            border-color: var(--primary);
-        }
-
         .search-icon {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            cursor: pointer;
+            pointer-events: none;
         }
 
-        /* Featured Section */
-        .hero {
+        /* --- SECTIONS --- */
+        section {
             padding: 40px 5%;
-            text-align: center;
+            max-width: 1400px;
+            margin: 0 auto;
         }
-        
-        .hero h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        .hero p { color: var(--text-muted); margin-bottom: 30px; }
 
-        /* Video Grid */
-        .video-gallery {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .section-title { font-size: 28px; font-weight: bold; text-transform: uppercase; }
+        .border-blue { border-left: 5px solid var(--accent-blue); padding-left: 15px; }
+        .border-green { border-left: 5px solid var(--accent-green); padding-left: 15px; }
+
+        /* --- TABS --- */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+        .green-tabs .tab-btn:hover, .green-tabs .tab-btn.active {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        /* --- VIDEO GRID --- */
+        .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 0 5% 50px 5%;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         .video-card {
-            background: var(--bg-card);
+            background: var(--bg-panel);
             border-radius: 8px;
             overflow: hidden;
-            transition: transform 0.3s;
             cursor: pointer;
+            transition: 0.3s;
             border: 1px solid transparent;
         }
-
         .video-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
+            border-color: var(--accent-blue);
         }
 
-        .thumbnail {
-            width: 100%;
+        .video-thumb {
             height: 160px;
-            background-color: #000;
+            background: #000;
             position: relative;
         }
-
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-
-        .video-card:hover .thumbnail img { opacity: 1; }
-
+        .video-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .video-card:hover .video-thumb img { opacity: 1; }
+        
         .play-overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-        }
-        
-        .play-btn {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45px; height: 45px;
+            background: rgba(52, 152, 219, 0.9);
             border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .video-info { padding: 15px; }
+        .video-tag { font-size: 11px; color: var(--accent-blue); font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .video-name { font-size: 15px; font-weight: 600; }
+
+        /* --- MEAL PLAN --- */
+        .meal-wrapper {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meal-grid {
+            flex: 2;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .meal-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-            box-shadow: 0 0 15px var(--primary);
+            gap: 10px;
         }
 
-        .card-info {
-            padding: 15px;
+        .meal-card:hover { background: #252525; }
+        .meal-card.selected {
+            border-color: var(--accent-green);
+            background: rgba(46, 204, 113, 0.1);
         }
-
-        .card-tag {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: var(--primary);
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .card-title {
-            font-size: 16px;
-            margin: 5px 0;
-            font-weight: 600;
-        }
-
-        .card-duration {
+        .meal-card.selected::after {
+            content: "✓";
+            position: absolute;
+            top: -8px; right: -8px;
+            background: var(--accent-green);
+            width: 22px; height: 22px;
+            border-radius: 50%;
             font-size: 12px;
-            color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            color: black; font-weight: bold;
         }
 
-        /* --- VIDEO PLAYER MODAL --- */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 2000; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.9);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        .meal-icon {
+            width: 40px; height: 40px;
+            background: #333;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
         }
 
-        .modal-content {
-            background: var(--bg-card);
-            width: 100%;
-            max-width: 900px;
+        .meal-info h4 { font-size: 14px; margin-bottom: 3px; }
+        .meal-info p { font-size: 11px; color: var(--text-muted); }
+
+        /* Stats Panel */
+        .stats-panel {
+            flex: 1;
+            min-width: 300px;
+            background: var(--bg-panel);
             border-radius: 10px;
+            padding: 25px;
+            border-top: 5px solid var(--accent-green);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        .stat-val { font-weight: bold; }
+        .val-p { color: #3498db; }
+        .val-c { color: #e67e22; }
+        .val-f { color: #f1c40f; }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            width: 90%; max-width: 900px;
+            background: black;
+            border-radius: 8px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-
         .close-modal {
             position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
+            top: -40px; right: 0;
+            color: white; font-size: 30px;
+            cursor: pointer; background: none; border: none;
         }
+        .video-frame { width: 100%; aspect-ratio: 16/9; border: none; }
 
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            height: 0;
-            background: black;
-        }
-
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Responsive */
-        @media(max-width: 600px) {
-            .hero h1 { font-size: 1.8rem; }
-            .search-input { width: 100%; }
-            .search-input:focus { width: 100%; }
+        @media (max-width: 768px) {
+            .meal-wrapper { flex-direction: column-reverse; }
+            .stats-panel { position: static; width: 100%; margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- PASSWORD LOCK SCREEN -->
+    <!-- 1. PASSWORD LOCK -->
     <div id="lock-screen">
-        <div class="lock-box">
-            <div class="lock-icon">🔒</div>
-            <h2 style="margin-bottom: 10px;">MEMBERS ONLY</h2>
-            <p style="color: #777; font-size: 14px; margin-bottom: 20px;">Enter Access Code</p>
+        <div class="lock-card">
+            <h2 style="color:var(--accent-blue); margin-bottom:10px;">MEMBER ACCESS</h2>
+            <p style="color:var(--text-muted); font-size:14px;">Enter code to access full library</p>
             <input type="password" id="password-input" class="lock-input" placeholder="Password">
-            <button id="unlock-btn" class="unlock-btn">UNLOCK GYM</button>
-            <div id="error-msg"></div>
+            <button id="unlock-btn" class="unlock-btn">UNLOCK</button>
+            <div id="lock-error"></div>
         </div>
     </div>
 
-    <!-- MAIN SITE CONTENT -->
-    <div id="page-content">
+    <!-- 2. MAIN APP -->
+    <div id="main-content">
         <header>
-            <div class="brand">IRON<span>GYM</span></div>
-            
-            <div class="search-wrapper">
-                <input type="text" id="search-input" class="search-input" placeholder="Search exercises...">
+            <div class="logo">Lion's <span>Den</span></div>
+            <div class="search-box">
+                <input type="text" id="video-search" class="search-input" placeholder="Search exercises...">
                 <span class="search-icon">🔍</span>
             </div>
         </header>
 
-        <section class="hero">
-            <h1>Exercise Video Library</h1>
-            <p>Click on any card to watch the full workout tutorial.</p>
+        <!-- --- VIDEO SECTION --- -->
+        <section>
+            <div class="section-header">
+                <div class="section-title border-blue">Exercise Library</div>
+            </div>
+            
+            <div class="tabs" id="video-tabs">
+                <button class="tab-btn active" onclick="filterVideos('all')">All</button>
+                <button class="tab-btn" onclick="filterVideos('Chest')">Chest</button>
+                <button class="tab-btn" onclick="filterVideos('Arm')">Arm</button>
+                <button class="tab-btn" onclick="filterVideos('Back')">Back</button>
+                <button class="tab-btn" onclick="filterVideos('Leg')">Leg</button>
+            </div>
+
+            <div id="video-grid" class="video-grid">
+                <!-- JS Injected -->
+            </div>
+            <div id="no-video-msg" style="display:none; text-align:center; color:var(--text-muted); padding:20px;">No videos found.</div>
         </section>
 
-        <div id="video-grid" class="video-gallery">
-            <!-- Videos injected via JS -->
-        </div>
+        <!-- --- MEAL PLAN SECTION --- -->
+        <section>
+            <div class="section-header">
+                <div class="section-title border-green">Nutrition Meal Planner</div>
+            </div>
+
+            <div class="tabs green-tabs" id="meal-tabs">
+                <button class="tab-btn active" onclick="filterMeals('all')">All</button>
+                <button class="tab-btn" onclick="filterMeals('Protein')">Protein</button>
+                <button class="tab-btn" onclick="filterMeals('Carbs')">Carbs</button>
+                <button class="tab-btn" onclick="filterMeals('Fruits')">Fruits</button>
+            </div>
+
+            <div class="meal-wrapper">
+                <div id="meal-grid" class="meal-grid">
+                    <!-- JS Injected -->
+                </div>
+
+                <div class="stats-panel">
+                    <h3 style="text-align:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">Daily Total Nutrition</h3>
+                    
+                    <div class="stat-row">
+                        <span>Protein</span>
+                        <span class="stat-val val-p" id="total-p">0g</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Carbs</span>
+                        <span class="stat-val val-c" id="total-c">0g</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Fats</span>
+                        <span class="stat-val val-f" id="total-f">0g</span>
+                    </div>
+                    <div class="stat-row" style="border:none; margin-top:20px; font-size:20px;">
+                        <span>Calories</span>
+                        <span class="stat-val" id="total-cal" style="color:white;">0 kcal</span>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- VIDEO PLAYER MODAL -->
+    <!-- 3. VIDEO MODAL -->
     <div id="video-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="video-wrapper">
-                <iframe id="player-frame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
+            <button class="close-modal">&times;</button>
+            <iframe id="player-frame" class="video-frame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>
     </div>
 
     <script>
-        // --- DATA: List of Exercises ---
-        // Using placeholder YouTube IDs for demonstration
-        const videoData = [
-            { id: 1, title: " Push Ups", category: "Chest", duration: "10:00", img: "https://picsum.photos/seed/pushup/400/250", videoId: "IODxDxX7oi4" },
-            { id: 4, title: "Heavy Squat Form", category: "Legs", duration: "12:20", img: "https://picsum.photos/seed/squat/400/250", videoId: "SW_C1A-rejs" },
-            { id: 7, title: "Deadlift Technique", category: "Back", duration: "14:00", img: "https://picsum.photos/seed/dead/400/250", videoId: "op9kVnSso6Q" },
 
 
+
+
+
+
+        // --- CONFIG ---
+        const PASSWORD = "LDF";
+
+
+
+
+
+
+
+
+
+
+
+        // --- DATA: EXERCISES (All Categories requested) ---
+        const exercises = [
+            // CHEST
+            { id: 1, title: "Bench Press", cat: "Chest", img: "https://cdn.mos.cms.futurecdn.net/pLaRi5jXSHDKu6WRydetBo.jpg", vidId: "rT7DgCr-3pg" },
+           
+            { id: 3, title: "Dumbell Chest Flys", cat: "Chest", img: "https://cdn.muscleandstrength.com/sites/default/files/dumbbell-fly.jpg", vidId: "eozdVDA78K0" },
+            { id: 4, title: "Push Ups", cat: "Chest", img: "https://www.sixstarpro.com/cdn/shop/articles/how-to-get-better-at-push-ups_c96cd61d-63d8-4bd0-a93e-e3a8dee52408.jpg?v=1726000547", vidId: "IODxDxX7oi4" },
+            { id: 5, title: "Cable Crossovers", cat: "Chest", img: "https://www.newbodyplan.co.uk/wp-content/uploads/2020/04/Best-cable-machine-chest-moves.jpg", vidId: "taI4XduLpTk" },
             
-            
+            // ARM
+            { id: 6, title: "Barbell Bicep Curl", cat: "Arm", img: "https://www.garagegymreviews.com/wp-content/uploads/2023/06/coop-doing-a-barbell-curl.jpg", vidId: "ykJmrZ5v0Oo" },
+            { id: 7, title: "Tricep Pushdown", cat: "Arm", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxIkyc_7Y1vGmdeCYW5OPIhFnfr7UF8eYr6w&s", vidId: "2yjwXTZQDDI" },
+            { id: 8, title: "Hammer Curl", cat: "Arm", img: "https://www.trainheroic.com/wp-content/uploads/2023/02/AdobeStock_417412809-TH-jpg.webp", vidId: "zC3nLlEvin4" },
+            { id: 9, title: "Skullcrushers", cat: "Arm", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1anKGw3St5Ya7Ndt8QJ25Zr3syTNyW5Rh-w&s", vidId: "kJDM7aU60x4" },
+            { id: 10, title: "Tricep Dips", cat: "Arm", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeFf3iHq-U-3PsU3vr7q71yFSixQzDrrhr8Q&s", vidId: "2z8JmcrW-As" },
+
+            // BACK
+            { id: 11, title: "Deadlift", cat: "Back", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFyUiWJngS97ciiG-Rn-AChWaj2tm25CJoAw&s", vidId: "op9kVnSso6Q" },
+            { id: 12, title: "Pull Up", cat: "Back", img: "https://www.myprotein.com/images?url=https://blogscdn.thehut.net/app/uploads/sites/478/2024/04/Untitled-design-20_1740137087-scaled.jpg&auto=avif&width=2560&fit=crop", vidId: "eGo4IYlbE5g" },
+            { id: 13, title: "Bent Over Row", cat: "Back", img: "https://app-media.fitbod.me/v2/44/images/landscape/0_960x540.jpg", vidId: "G8l_8chR5BE" },
+            { id: 14, title: "Lat Pulldown", cat: "Back", img: "https://i0.wp.com/www.muscleandfitness.com/wp-content/uploads/2024/06/A-strong-male-working-out-his-back-muscles-with-lat-pulldown-variations.jpg?quality=86&strip=all", vidId: "CAwf7n6Luuc" },
+            { id: 15, title: "Seated Cable Row", cat: "Back", img: "https://steelsupplements.com/cdn/shop/articles/shutterstock_1009030792_1600x.jpg?v=1599316796", vidId: "G6lqL4-9g7Q" },
+
+            // LEG
+            { id: 16, title: "Barbell Squat", cat: "Leg", img: "https://hips.hearstapps.com/hmg-prod/images/man-training-with-weights-royalty-free-image-1718637105.jpg?crop=0.670xw:1.00xh;0.138xw,0&resize=1200:*", vidId: "SW_C1A-rejs" },
+            { id: 17, title: "Leg Press", cat: "Leg", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdB7L5PbNCRbVXJWwybJE9eR0ZMlCPuFoi3g&s", vidId: "IZxyjW7MPJQ" },
+            { id: 18, title: "Walking Lunges", cat: "Leg", img: "https://www.soletreadmills.com/cdn/shop/articles/A_man_doing_dumbbell_lunges.png?v=1749653072&width=1200", vidId: "QOVaHwm-Q6U" },
+            { id: 19, title: "Romanian Deadlift", cat: "Leg", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ226HZaGkiGQEk6qNLpeTZ4mdd_vWjtApozA&s", vidId: "8-XTZt7M-1w" },
+            { id: 20, title: "Calf Raises", cat: "Leg", img: "https://www.puregym.com/media/ivvmwrqc/calf-raise.jpg?quality=80", vidId: "gwLzBJYoWlI" },
         ];
 
-        // --- DOM ELEMENTS ---
+        // --- DATA: MEALS (Based on specific user list) ---
+        const meals = [
+            // PROTEIN
+            { id: 101, name: "Chicken Breast", cat: "Protein", p: 31, c: 0, f: 3.6, cal: 165, icon: "🍗" },
+            { id: 102, name: "Turkey", cat: "Protein", p: 29, c: 0, f: 2, cal: 147, icon: "🦃" },
+            { id: 103, name: "Salmon", cat: "Protein", p: 20, c: 0, f: 13, cal: 208, icon: "🐟" },
+            { id: 104, name: "Tuna", cat: "Protein", p: 28, c: 0, f: 1, cal: 132, icon: "🐟" },
+            { id: 105, name: "Cod", cat: "Protein", p: 18, c: 0, f: 0.5, cal: 82, icon: "🐟" },
+            { id: 106, name: "Eggs", cat: "Protein", p: 6, c: 0.6, f: 5, cal: 78, icon: "🥚" },
+            { id: 107, name: "Greek Yogurt", cat: "Protein", p: 10, c: 3.6, f: 0.4, cal: 59, icon: "🥛" },
+            { id: 108, name: "Cottage Cheese", cat: "Protein", p: 11, c: 3.4, f: 2.3, cal: 98, icon: "🧀" },
+            { id: 109, name: "Milk", cat: "Protein", p: 8, c: 12, f: 8, cal: 149, icon: "🥛" },
+            { id: 110, name: "Lentils", cat: "Protein", p: 9, c: 20, f: 0.4, cal: 116, icon: "🥣" },
+            { id: 111, name: "Chickpeas", cat: "Protein", p: 8.9, c: 27, f: 2.6, cal: 164, icon: "🥣" },
+            { id: 112, name: "Black Beans", cat: "Protein", p: 8.9, c: 20, f: 0.5, cal: 132, icon: "🫘" },
+            { id: 113, name: "Almonds", cat: "Protein", p: 6, c: 6, f: 14, cal: 164, icon: "🥜" },
+            { id: 114, name: "Peanuts", cat: "Protein", p: 7, c: 5, f: 14, cal: 161, icon: "🥜" },
+            { id: 115, name: "Chia Seeds", cat: "Protein", p: 4, c: 12, f: 9, cal: 137, icon: "🌱" },
+            { id: 116, name: "Tofu", cat: "Protein", p: 8, c: 2, f: 4.8, cal: 76, icon: "🥡" },
+            { id: 117, name: "Tempeh", cat: "Protein", p: 18, c: 9, f: 11, cal: 193, icon: "🥡" },
+            { id: 118, name: "Edamame", cat: "Protein", p: 11, c: 8, f: 5, cal: 121, icon: "🥡" },
+
+            // CARBS
+            { id: 201, name: "Oats", cat: "Carbs", p: 5, c: 27, f: 2.5, cal: 150, icon: "🥣" },
+            { id: 202, name: "Brown Rice", cat: "Carbs", p: 3, c: 23, f: 1, cal: 111, icon: "🍚" },
+            { id: 203, name: "Quinoa", cat: "Carbs", p: 4, c: 21, f: 1.9, cal: 120, icon: "🥣" },
+            { id: 204, name: "Sweet Potatoes", cat: "Carbs", p: 2, c: 20, f: 0.1, cal: 86, icon: "🍠" },
+            { id: 205, name: "Whole Grain Pasta", cat: "Carbs", p: 7, c: 43, f: 0.9, cal: 174, icon: "🍝" },
+            { id: 206, name: "Bananas", cat: "Carbs", p: 1.3, c: 27, f: 0.3, cal: 105, icon: "🍌" },
+            { id: 207, name: "Berries", cat: "Carbs", p: 1, c: 14, f: 0.5, cal: 57, icon: "🫐" },
+            { id: 208, name: "Apples", cat: "Carbs", p: 0.5, c: 25, f: 0.3, cal: 95, icon: "🍎" },
+            { id: 209, name: "Beans", cat: "Carbs", p: 8, c: 21, f: 0.6, cal: 123, icon: "🫘" },
+            { id: 210, name: "Lentils", cat: "Carbs", p: 9, c: 20, f: 0.4, cal: 116, icon: "🥣" },
+
+            // FRUITS
+            { id: 301, name: "Bananas", cat: "Fruits", p: 1.3, c: 27, f: 0.3, cal: 105, icon: "🍌" },
+            { id: 302, name: "Dates", cat: "Fruits", p: 2, c: 75, f: 0.4, cal: 277, icon: "🌴" },
+            { id: 303, name: "Avocado", cat: "Fruits", p: 2, c: 9, f: 15, cal: 160, icon: "🥑" },
+            { id: 304, name: "Mangoes", cat: "Fruits", p: 1.5, c: 28, f: 0.6, cal: 100, icon: "🥭" },
+            { id: 305, name: "Apples", cat: "Fruits", p: 0.5, c: 25, f: 0.3, cal: 95, icon: "🍎" },
+            { id: 306, name: "Watermelon", cat: "Fruits", p: 1, c: 12, f: 0.2, cal: 46, icon: "🍉" },
+        ];
+
+        // --- STATE & DOM ---
+        let selectedMeals = new Set();
+        let currentVideoCat = 'all';
+        let currentMealCat = 'all';
+        let searchQuery = "";
+
         const lockScreen = document.getElementById('lock-screen');
-        const pageContent = document.getElementById('page-content');
+        const mainContent = document.getElementById('main-content');
         const passInput = document.getElementById('password-input');
         const unlockBtn = document.getElementById('unlock-btn');
-        const errorMsg = document.getElementById('error-msg');
-        
-        const gridContainer = document.getElementById('video-grid');
-        const searchInput = document.getElementById('search-input');
-        
+        const lockError = document.getElementById('lock-error');
+
+        const videoGrid = document.getElementById('video-grid');
+        const searchInput = document.getElementById('video-search');
+        const noVideoMsg = document.getElementById('no-video-msg');
+        const videoTabs = document.getElementById('video-tabs');
+
+        const mealGrid = document.getElementById('meal-grid');
+        const mealTabs = document.getElementById('meal-tabs');
+
+        const totalP = document.getElementById('total-p');
+        const totalC = document.getElementById('total-c');
+        const totalF = document.getElementById('total-f');
+        const totalCal = document.getElementById('total-cal');
+
         const modal = document.getElementById('video-modal');
-        const playerFrame = document.getElementById('player-frame');
-        const closeModal = document.querySelector('.close-modal');
+        const iframe = document.getElementById('player-frame');
+        const closeBtn = document.querySelector('.close-modal');
 
-        // --- PASSWORD LOGIC ---
-        const SECRET_CODE = "LDF0701#";
+        // --- FUNCTIONS ---
 
+        // 1. Unlock Logic
         unlockBtn.addEventListener('click', () => {
-            if(passInput.value === SECRET_CODE) {
-                // Success
+            if(passInput.value === PASSWORD) {
                 lockScreen.style.opacity = '0';
                 setTimeout(() => {
                     lockScreen.style.display = 'none';
-                    pageContent.style.display = 'block';
-                    setTimeout(() => pageContent.style.opacity = '1', 50);
+                    mainContent.style.display = 'block';
+                    setTimeout(() => mainContent.style.opacity = '1', 50);
                 }, 500);
             } else {
-                // Error
-                errorMsg.textContent = "Access Denied: Wrong Password";
-                passInput.style.borderColor = "#ff4757";
+                lockError.textContent = "Access Denied: Wrong Password";
+                passInput.style.borderColor = "var(--accent-blue)";
                 passInput.value = "";
-                passInput.focus();
             }
         });
+        passInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') unlockBtn.click(); });
 
-        // Allow Enter key to submit password
-        passInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') unlockBtn.click();
-        });
+        // 2. Video Logic
+        function renderVideos() {
+            videoGrid.innerHTML = "";
+            const term = searchQuery.toLowerCase();
+            const filtered = exercises.filter(ex => {
+                const matchesCat = currentVideoCat === 'all' || ex.cat === currentVideoCat;
+                const matchesSearch = ex.title.toLowerCase().includes(term);
+                return matchesCat && matchesSearch;
+            });
 
-        // --- RENDER FUNCTION ---
-        function renderVideos(videos) {
-            gridContainer.innerHTML = "";
-            
-            if(videos.length === 0) {
-                gridContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777;">No videos found.</p>`;
-                return;
-            }
+            if(filtered.length === 0) noVideoMsg.style.display = 'block';
+            else noVideoMsg.style.display = 'none';
 
-            videos.forEach(vid => {
+            filtered.forEach(vid => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.innerHTML = `
-                    <div class="thumbnail">
-                        <img src="${vid.img}" alt="${vid.title}">
-                        <div class="play-overlay">
-                            <div class="play-btn">▶</div>
-                        </div>
+                    <div class="video-thumb">
+                        <img src="${vid.img}">
+                        <div class="play-overlay">▶</div>
                     </div>
-                    <div class="card-info">
-                        <div class="card-tag">${vid.category}</div>
-                        <div class="card-title">${vid.title}</div>
-                        <div class="card-duration">⏱ ${vid.duration}</div>
+                    <div class="video-info">
+                        <span class="video-tag">${vid.cat}</span>
+                        <div class="video-name">${vid.title}</div>
                     </div>
                 `;
-                
-                // Add Click Event to Open Modal
-                card.addEventListener('click', () => openVideo(vid));
-                gridContainer.appendChild(card);
+                card.addEventListener('click', () => openVideo(vid.vidId));
+                videoGrid.appendChild(card);
             });
         }
 
-        // --- SEARCH LOGIC ---
+        window.filterVideos = (cat) => {
+            currentVideoCat = cat;
+            Array.from(videoTabs.children).forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent === cat || (cat === 'all' && btn.textContent === 'All')) btn.classList.add('active');
+            });
+            renderVideos();
+        };
+
         searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = videoData.filter(v => 
-                v.title.toLowerCase().includes(term) || 
-                v.category.toLowerCase().includes(term)
-            );
-            renderVideos(filtered);
+            searchQuery = e.target.value;
+            renderVideos();
         });
 
-        // --- MODAL PLAYER LOGIC ---
-        function openVideo(video) {
-            // Set iframe source to YouTube Embed
-            playerFrame.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+        // 3. Video Player
+        function openVideo(vidId) {
+            iframe.src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
             modal.style.display = 'flex';
         }
-
-        function closeVideo() {
+        closeBtn.onclick = function() {
             modal.style.display = 'none';
-            playerFrame.src = ""; // Stop audio/video
+            iframe.src = "";
+        }
+        window.onclick = function(e) { if(e.target === modal) closeBtn.click(); }
+
+        // 4. Meal Logic
+        function renderMeals() {
+            mealGrid.innerHTML = "";
+            const filtered = currentMealCat === 'all' ? meals : meals.filter(m => m.cat === currentMealCat);
+
+            filtered.forEach(meal => {
+                const card = document.createElement('div');
+                card.className = `meal-card ${selectedMeals.has(meal.id) ? 'selected' : ''}`;
+                card.onclick = () => toggleMeal(meal.id);
+                
+                card.innerHTML = `
+                    <div class="meal-icon">${meal.icon}</div>
+                    <div class="meal-info">
+                        <h4>${meal.name}(100g)</h4>
+                        <p>${meal.cal} kcal</p>
+                        <p>${meal.p} protine</p>
+                    </div>
+                `;
+                mealGrid.appendChild(card);
+            });
         }
 
-        closeModal.addEventListener('click', closeVideo);
-        
-        // Close if clicking outside video
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeVideo();
-            }
+        window.filterMeals = (cat) => {
+            currentMealCat = cat;
+            Array.from(mealTabs.children).forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent === cat || (cat === 'all' && btn.textContent === 'All')) btn.classList.add('active');
+            });
+            renderMeals();
+        };
+
+        function toggleMeal(id) {
+            if(selectedMeals.has(id)) selectedMeals.delete(id);
+            else selectedMeals.add(id);
+            renderMeals();
+            calculateTotals();
         }
 
-        // Initial Render
-        renderVideos(videoData);
+        function calculateTotals() {
+            let p=0, c=0, f=0, cal=0;
+            selectedMeals.forEach(id => {
+                const m = meals.find(x => x.id === id);
+                if(m) {
+                    p += m.p; c += m.c; f += m.f; cal += m.cal;
+                }
+            });
+            totalP.innerText = p + "g";
+            totalC.innerText = c + "g";
+            totalF.innerText = f + "g";
+            totalCal.innerText = cal + " kcal";
+        }
+
+        // --- INIT ---
+        renderVideos();
+        renderMeals();
 
     </script>
 </body>
