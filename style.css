@@ -609,7 +609,7 @@
         /* Main Container */
         .calculator-card {
             background: var(--card-bg);
-            max-width: 90%;
+            width: 90%;
          
             border-radius: var(--radius);
             box-shadow: var(--shadow);
