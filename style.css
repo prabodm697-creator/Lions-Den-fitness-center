@@ -119,7 +119,7 @@
         /* --- Hero Section --- */
         .hero {
             height: 100vh;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('desktop-wallpaper-best-4-fitness-on-hip-gym-boy.jpg') no-repeat center center/cover;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://e1.pxfuel.com/desktop-wallpaper/554/24/desktop-wallpaper-best-4-fitness-on-hip-gym-boy.jpg') no-repeat center center/cover;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -1023,3 +1023,162 @@
 
 
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /* 
+         * DESIGN TOKENS 
+         */
+        :root {
+            --bg-color: #080808;
+            --text-main: #ffffff;
+            --accent-color: #00bdf6; /* Aggressive Red */
+            --font-primary: 'Anton', sans-serif;
+        }
+
+ 
+
+
+        /* 
+         * LOADER CONTAINER 
+         */
+        .gym-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        /* Class to slide the loader up and away */
+        .gym-loader.slide-up {
+            transform: translateY(-100%);
+        }
+
+        /* 
+         * TYPOGRAPHY 
+         */
+        .brand-name {
+            font-size: clamp(3rem, 10vw, 6rem); /* Responsive huge text */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            line-height: 1;
+            margin-bottom: 20px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        /* Individual letter styling */
+        .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(50px) scale(0.5); /* Start down and small */
+            /* Animation set via JS or CSS delay classes */
+            animation: slamIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Make the apostrophe red */
+        .char.apostrophe {
+            color: var(--accent-color);
+        }
+
+        .sub-text {
+            font-family: sans-serif; /* Cleaner font for small text */
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 2s ease-out 1.5s forwards;
+        }
+
+        /* 
+         * AGGRESSIVE PROGRESS BAR 
+         */
+        .bar-container {
+            width: 0%; /* Starts hidden, grows via JS */
+            height: 6px;
+            background-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            opacity: 0;
+            animation: barGrow 2s cubic-bezier(0.22, 1, 0.36, 1) 1.2s forwards;
+            max-width: 300px;
+        }
+
+        /* 
+         * GRAIN OVERLAY (Gritty Texture) 
+         */
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 
+         * ANIMATIONS 
+         */
+        @keyframes slamIn {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.5);
+            }
+            70% {
+                transform: translateY(-10px) scale(1.05); /* Overshoot */
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes barGrow {
+            0% { width: 0%; opacity: 1; }
+            100% { width: 100%; opacity: 1; }
+        }
+
+        /* 
+         * MOCK WEBSITE 
+         */
+        .website-content {
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 2.5s forwards; /* Appears after loader slides up */
+        }
+
+        .website-content h1 { font-family: var(--font-primary); font-size: 4rem; }
+        .website-content p { font-family: sans-serif; color: #666; margin-top: 10px;}

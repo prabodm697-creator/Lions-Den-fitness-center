@@ -315,3 +315,68 @@
 
         // Start
         init();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ document.addEventListener('DOMContentLoaded', () => {
+            const text = "LION'S DEN";
+            const brandContainer = document.getElementById('brand-text');
+            const loader = document.getElementById('loader');
+
+            // 1. Split text into individual spans for animation
+            text.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char === ' ' ? '\u00A0' : char; // Handle spaces
+                span.classList.add('char');
+                
+                // Add apostrophe color class specifically
+                if (char === "'") {
+                    span.classList.add('apostrophe');
+                }
+
+                // Stagger the animation: index * 0.1s delay
+                span.style.animationDelay = `${index * 0.1}s`;
+                
+                brandContainer.appendChild(span);
+            });
+
+            // 2. Simulate Loading Completion
+            // The bar takes 2 seconds to grow + 1.2s delay = 3.2s total roughly
+            // We set the timeout to slide the screen up slightly after that.
+            setTimeout(() => {
+                finishLoading();
+            }, 3500);
+
+            function finishLoading() {
+                // Add class to slide loader up
+                loader.classList.add('slide-up');
+                
+                // Remove from DOM after transition
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    // Optional: remove the grain too if you don't want it on the main site
+                    // document.querySelector('.grain').style.display = 'none';
+                }, 800); // Matches CSS transition time
+            }
+        });
