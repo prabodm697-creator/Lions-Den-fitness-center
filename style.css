@@ -574,3 +574,452 @@
 
 
 
+
+
+
+
+:root {
+            /* Color Palette */
+            --primary: #4361ee;
+            --bg-color: #f8f9fa;
+            --card-bg: #6f6d6d25;
+            --text-main: #f7f8ff;
+            --text-muted: #8d99ae;
+            
+            /* Status Colors */
+            --underweight: #4cc9f0;
+            --normal: #2ec4b6;
+            --overweight: #ff9f1c;
+            --obese: #e71d36;
+
+            /* Layout */
+            --radius: 24px;
+            --shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+
+
+        /* Main Container */
+        .calculator-card {
+            background: var(--card-bg);
+            max-width: 90%;
+         
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 20px 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Unit Toggle */
+        .unit-toggle {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: #f0f2f5;
+            border-radius: 50px;
+            padding: 4px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* Input Section */
+        .input-section {
+            padding: 10px 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .label-row label {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .value-display {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Slider Track */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e9ecef;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        /* Slider Thumb */
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px; /* center on track */
+            box-shadow: 0 2px 6px rgba(67, 97, 238, 0.4);
+            border: 2px solid white;
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Gauge / Animation Area */
+        .gauge-container {
+            position: relative;
+            width: 280px;
+            height: 140px; /* Half circle */
+            margin: 0 auto 20px;
+            overflow: hidden;
+        }
+
+        .gauge-bg {
+            width: 280px;
+            height: 280px;
+            background: #e9ecef;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(0deg); /* Will be set by JS */
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); 
+        }
+
+        .gauge-fill {
+            width: 280px;
+            height: 280px;
+            background: var(--primary); /* Dynamic color */
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+            opacity: 0.2; /* Subtle fill */
+            transform: rotate(-180deg);
+            transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.5s ease;
+        }
+
+        /* Needle */
+        .needle {
+            width: 4px;
+            height: 120px;
+            background: #2b2d42;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg); /* Start position */
+            transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-radius: 4px;
+            z-index: 2;
+        }
+        
+        .needle::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: #2b2d42;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Text Result Overlay */
+        .result-overlay {
+            text-align: center;
+            margin-top: -20px; /* Pull up slightly */
+        }
+
+        .mbi-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .mbi-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary); /* Dynamic color */
+            margin-top: 5px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.5s ease;
+        }
+
+        .mbi-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            padding: 0 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #adb5bd;
+            border-top: 1px solid #eee;
+        }
+
+        /* Animation utilities */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calculator-card {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Color Zones for Gauge */
+        .zone-markers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+
+
+
+        
+
+
+
+
+
+
+
+             /* --- LOCATION SECTION (CORE REQUEST) --- */
+        #location {
+            padding: var(--spacing-section) 0;
+            background-color: #161616;
+        }
+
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .location-info {
+            padding: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .info-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .info-text h4 {
+            color: var(--text-main);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .map-container {
+            width: 400px;
+            height: 200px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #333;
+        }
+        
+        /* Simulated Map Image */
+        .map-placeholder-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        .map-overlay-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: white;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+
+
+/*supliment btn*/
+
+
+ 
+
+    /* --- 2. The "Boxed" Container --- */
+    .card-container {
+        /* Auto-Adjust: 90% width on mobile, max 500px on desktop */
+        width: 90%;
+        max-width: block; 
+     
+        background-color: #464444; /* Slightly lighter black than body */
+        
+        /* The Frame */
+        border: 1px solid #333; 
+        border-radius: 30px;
+        
+        /* Layout inside the box */
+        text-align: center;
+        padding: 4rem 2rem; /* Generous padding */
+        
+        /* Visual Polish */
+        box-shadow: 0 20px 50px rgba(95, 94, 94, 0.8), 
+                    0 0 0 1px rgba(255,255,255,0.05) inset; /* Inner glow for depth */
+    }
+
+    /* --- 3. Responsive Typography --- */
+    h1 {
+        /* 
+           clamp(min, preferred, max):
+           Smallest size: 1.8rem (mobile)
+           Preferred size: 5vw (scales with screen width)
+           Largest size: 3rem (desktop)
+        */
+        font-size: clamp(1.8rem, 5vw, 3rem);
+        
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 2.5rem;
+        line-height: 1.1;
+    }
+
+    /* --- 4. The Button --- */
+    .btn-shop {
+        display: block; /* Makes it fill the width of the container */
+        width: 200px;
+        
+        background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
+        color: #000000;
+        text-decoration: none;
+        
+        /* Auto-resize padding */
+        padding: 18px 0; 
+        
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        
+        border-radius: 50px; /* Pill shape */
+        border: none;
+        cursor: pointer;
+        
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Hover Effect */
+    .btn-shop:hover {
+        transform: scale(1.02); /* Slightly larger */
+        box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+    }
+
+    /* Active Effect (Clicking) */
+    .btn-shop:active {
+        transform: scale(0.98);
+    }
+
+
+        
