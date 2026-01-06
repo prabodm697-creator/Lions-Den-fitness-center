@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitTrack Pro</title>
+    <style>
+        :root {
+            --primary: #00bdf6; /* Neon Green */
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2c2c2c;
+            --text-light: #ffffff;
+            --text-gray: #b0b0b0;
+            --accent-blue: #448aff;
+            --accent-orange: #ffab40;
+            --accent-purple: #d500f9; /* For Fat/Facts */
+            --nav-height: 70px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background-color: var(--primary); color: #000; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-done { background-color: #333; color: var(--text-gray); width: 100%; margin-top: 10px; font-size: 0.8rem; padding: 8px; }
+        .btn-done.active { background-color: var(--primary); color: #000; }
+
+        /* --- Login Screen --- */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-dark);
+            z-index: 5000;
+            flex-direction: column;
+        }
+        .login-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: var(--bg-input);
+            color: white;
+            font-size: 1rem;
+        }
+
+        /* --- Main App Layout --- */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Header */
+        header {
+            padding: 15px;
+            background: var(--bg-card);
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            padding-bottom: calc(var(--nav-height) + 20px);
+        }
+
+        section {
+            padding: 20px;
+            min-height: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Common Components --- */
+        .search-bar-container { margin-bottom: 15px; }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background: var(--bg-input);
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--primary); }
+
+        .filter-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        
+        .filter-btn {
+            background: var(--bg-card);
+            color: var(--text-gray);
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* --- Navigation --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: var(--nav-height);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            background: none;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            height: 100%;
+            justify-content: center;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; }
+
+        /* --- Exercise Section (Image + Video) --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .card-thumb {
+            width: 100%;
+            height: 110px;
+            position: relative;
+            cursor: pointer;
+        }
+        .card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .play-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; z-index: 2;
+        }
+        .card-body { padding: 12px; }
+        .card-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+        .card-badge {
+            font-size: 0.7rem;
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+        }
+        .card.completed { border: 2px solid var(--primary); }
+        .card.completed .btn-done { display: none; } /* Hide button if already done */
+        .done-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--primary); color: black; font-weight: bold;
+            padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; z-index: 5;
+            display: none;
+        }
+        .card.completed .done-badge { display: block; }
+
+        /* Timer Modal */
+        #timer-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 4000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 20px;
+        }
+        .timer-msg { font-size: 1.2rem; color: white; margin-bottom: 40px; }
+
+        /* Video Modal */
+        #video-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+        }
+        .video-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            z-index: 10;
+        }
+        .video-content {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* --- Nutrition Section (Text Only) --- */
+        .nutrition-dashboard {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .progress-circle { position: relative; width: 60px; height: 60px; }
+        .progress-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .progress-circle circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+        .circle-bg { stroke: #333; }
+        .circle-fg { 
+            stroke-dasharray: 170; 
+            stroke-dashoffset: 170; 
+            transition: stroke-dashoffset 0.8s ease;
+        }
+        .circle-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.65rem; font-weight: bold;
+        }
+        .circle-label { text-align: center; margin-top: 5px; font-size: 0.7rem; color: var(--text-gray); }
+
+        .meal-list-item {
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .meal-list-item.selected { border-color: var(--primary); background: rgba(172, 187, 180, 0.1); }
+        .meal-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .meal-macros { font-size: 0.75rem; color: var(--text-gray); display: flex; gap: 8px; flex-wrap: wrap;}
+        .check-indicator {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 2px solid #555; display: flex; align-items: center; justify-content: center;
+        }
+        .meal-list-item.selected .check-indicator {
+            background: var(--primary); border-color: var(--primary); color: black; font-weight: bold;
+        }
+
+        /* --- Weight Section --- */
+        .input-group { margin-bottom: 15px; background: var(--bg-card); padding: 15px; border-radius: 8px; }
+        .form-input {
+            width: 100%; padding: 10px; background: var(--bg-input);
+            border: 1px solid #444; color: white; border-radius: 4px; margin-bottom: 10px;
+        }
+        .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; background: var(--bg-card); }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #333; white-space: nowrap; }
+        th { background: #252525; color: var(--primary); font-size: 0.85rem; }
+        td input {
+            width: 60px; padding: 6px; text-align: center;
+            background: #333; border: 1px solid #444; color: white; border-radius: 4px;
+        }
+
+        #toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 6000;
+        }
+        #toast.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification -->
+    <div id="toast">Notification</div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex-center">
+        <div class="login-card">
+            <h2 style="margin-bottom: 10px; color: var(--primary);">Members only</h2>
+            <p style="color: var(--text-gray); margin-bottom: 20px;">Enter password to access</p>
+            <input type="password" id="password-input" class="login-input" placeholder="Password">
+            <button class="btn btn-primary" style="width: 100%;" onclick="checkLogin()">Log In</button>
+            <p id="login-error" style="color: var(--accent-orange); font-size: 0.8rem; margin-top: 10px;" class="hidden">Incorrect password</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden">
+        <header>
+            <h1>LDF Tracker</h1>
+            <span style="font-size: 0.8rem; color: var(--text-gray);">Member: <span id="membership-display">Loading...</span></span>
+        </header>
+
+        <main>
+            <!-- EXERCISE SECTION -->
+            <section id="section-exercise">
+                <div class="search-bar-container">
+                    <input type="text" id="exercise-search" class="search-input" placeholder="Search exercises..." onkeyup="renderExercises()">
+                </div>
+                <div class="filter-scroll" id="exercise-filters">
+                    <button class="filter-btn active" onclick="setExerciseFilter('all')">All</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('chest')">Chest</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('back')">Back</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('shoulder')">Shoulder</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('arm')">Arm</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('legs')">Legs</button>
+                    <button class="filter-btn" onclick="setExerciseFilter('abs')">Abs</button>
+                </div>
+                <div class="grid-container" id="exercise-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- NUTRITION SECTION -->
+            <section id="section-nutrition" class="hidden">
+                <div class="nutrition-dashboard">
+                    <div>
+                        <div class="progress-circle">
+                            <svg><circle class="circle-bg" cx="30" cy="30" r="27"></circle><circle class="circle-fg" id="track-protein" cx="30" cy="30" r="27" stroke="var(--primary)"></circle></svg>
+                            <div class="circle-text" id="text-protein">0g</div>
+                        </div>
+                        <div class="circle-label">Protein</div>
+                    </div>
+                    <div>
+                        <div class="progress-circle">
+                            <svg><circle class="circle-bg" cx="30" cy="30" r="27"></circle><circle class="circle-fg" id="track-carbs" cx="30" cy="30" r="27" stroke="var(--accent-blue)"></circle></svg>
+                            <div class="circle-text" id="text-carbs">0g</div>
+                        </div>
+                        <div class="circle-label">Carbs</div>
+                    </div>
+                    <div>
+                        <div class="progress-circle">
+                            <svg><circle class="circle-bg" cx="30" cy="30" r="27"></circle><circle class="circle-fg" id="track-fat" cx="30" cy="30" r="27" stroke="var(--accent-purple)"></circle></svg>
+                            <div class="circle-text" id="text-fat">0g</div>
+                        </div>
+                        <div class="circle-label">Facts</div>
+                    </div>
+                    <div>
+                        <div class="progress-circle">
+                            <svg><circle class="circle-bg" cx="30" cy="30" r="27"></circle><circle class="circle-fg" id="track-kcal" cx="30" cy="30" r="27" stroke="var(--accent-orange)"></circle></svg>
+                            <div class="circle-text" id="text-kcal">0</div>
+                        </div>
+                        <div class="circle-label">Energy</div>
+                    </div>
+                </div>
+
+                <div class="search-bar-container">
+                    <input type="text" id="nutrition-search" class="search-input" placeholder="Search meals..." onkeyup="renderNutrition()">
+                </div>
+
+                <div class="filter-scroll" id="nutrition-filters">
+                    <button class="filter-btn active" onclick="setNutritionFilter('all')">All</button>
+                    <button class="filter-btn" onclick="setNutritionFilter('protein')">Protein</button>
+                    <button class="filter-btn" onclick="setNutritionFilter('carbs')">Carbs</button>
+                    <button class="filter-btn" onclick="setNutritionFilter('facts')">Facts</button>
+                    <button class="filter-btn" onclick="setNutritionFilter('energy')">Energy</button>
+                </div>
+
+                <div id="meal-list"></div>
+            </section>
+
+            <!-- WEIGHT IMPROVEMENT SECTION -->
+            <section id="section-weight" class="hidden">
+                <div class="input-group">
+                    <h3 style="margin-bottom:10px;">Member Info</h3>
+                    <input type="text" id="membership-input" class="form-input" placeholder="Enter Membership Number" value="MEM-12345">
+                </div>
+                <div class="input-group">
+                    <h3 style="margin-bottom:10px;">Manage Progress</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <input type="text" id="new-exercise-name" class="form-input" placeholder="Exercise Name">
+                        <button class="btn btn-primary" onclick="addExerciseRow()">Add</button>
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%;" onclick="addDayColumn()">+ Add More Days</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="weight-table">
+                        <thead>
+                            <tr id="table-header-row">
+                                <th>Exercise</th>
+                                <th>Day 1</th>
+                                <th>Day 2</th>
+                                <th>Day 3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;" onclick="sendToWhatsapp()">
+                    Send Report via WhatsApp
+                </button>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('exercise')">
+                <span class="nav-icon">💪</span>
+                <span>Exercise</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('nutrition')">
+                <span class="nav-icon">🥗</span>
+                <span>Nutrition</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('weight')">
+                <span class="nav-icon">📈</span>
+                <span>Weight chart</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="hidden">
+        <div class="video-header">
+            <span id="video-title-display">Exercise Name</span>
+            <button class="btn btn-outline" style="border-color:white; color:white; padding: 5px 15px;" onclick="closeVideo()">Close Video</button>
+        </div>
+        <div class="video-content" id="video-player-container"></div>
+    </div>
+
+    <!-- Timer Modal -->
+    <div id="timer-modal" class="hidden flex-center">
+        <div class="timer-display" id="timer-text">03:00</div>
+        <div class="timer-msg">Rest for your next exercise</div>
+        <button class="btn btn-primary" onclick="stopTimer()">Stop Timer</button>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        // --- DATA (With Images & YouTube Embed Links) ---
+        const exercises = [
+            { id: 1, name: "Bench Press", category: "chest", videoUrl: "https://cdn.mos.cms.futurecdn.net/pLaRi5jXSHDKu6WRydetBo.jpg", thumb: "https://cdn.mos.cms.futurecdn.net/pLaRi5jXSHDKu6WRydetBo.jpg", completed: false },
+            { id: 2, name: "Incline Dumbbell", category: "chest", videoUrl: "https://www.youtube.com/embed/8iPEnn-ltC8", thumb: "https://www.puregym.com/media/shtduovg/incline-dumbbell-bench-press.jpg?quality=80", completed: false },
+            { id: 3, name: "Cable Crossover", category: "chest", videoUrl: "https://www.youtube.com/embed/taI4XduLpTk", thumb: "https://www.gymreapers.com/cdn/shop/articles/cable_crossovers.jpg?v=1687891380&width=2048", completed: false },
+            { id: 4, name: "Lat Pulldown", category: "back", videoUrl: "https://www.youtube.com/embed/CAwf7n6Luuc", thumb: "https://www.puregym.com/media/deqdnzwp/lat-pull-down.jpg?quality=80", completed: false },
+            { id: 5, name: "Barbell Row", category: "back", videoUrl: "https://www.youtube.com/embed/G8l_8chR5BE", thumb: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRSrcI3rRssmU2DiY0QslAce7gG85UOexKoA&s", completed: false },
+            { id: 6, name: "Pull Ups", category: "back", videoUrl: "https://www.youtube.com/embed/eGo4IYlbE5g", thumb: "https://www.myprotein.com/images?url=https://blogscdn.thehut.net/app/uploads/sites/478/2024/04/Untitled-design-20_1740137087-scaled.jpg&auto=avif&width=2560&fit=crop", completed: false },
+            { id: 7, name: "Overhead Press", category: "shoulder", videoUrl: "https://www.youtube.com/embed/2yjwXTZQDDI", thumb: "https://cdn.muscleandstrength.com/sites/default/files/military-overhead-press.jpg", completed: false },
+            { id: 8, name: "Lateral Raise", category: "shoulder", videoUrl: "https://www.youtube.com/embed/3VcKaXpzqRo", thumb: "https://i0.wp.com/www.strengthlog.com/wp-content/uploads/2024/12/dumbbell-lateral-raise-vs.-cable-lateral-raise-1-scaled.jpg?fit=2560%2C1707&ssl=1", completed: false },
+            { id: 9, name: "Bicep Curl", category: "arm", videoUrl: "https://www.youtube.com/embed/ykJmrZ5v0Oo", thumb: "https://i.ytimg.com/vi/ykJmrZ5v0Oo/maxresdefault.jpg", completed: false },
+            { id: 10, name: "Tricep Pushdown", category: "arm", videoUrl: "https://www.youtube.com/embed/ki5VA1XPrTI", thumb: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTyouUOq1pLgydhirme85mv8B_9GQLVJlJTg&s", completed: false },
+            { id: 11, name: "Squat", category: "legs", videoUrl: "https://www.youtube.com/embed/YaXPRqUwItQ", thumb: "https://www.sundried.com/cdn/shop/articles/squat-gym-workout-sundried_0a1860bd-111f-45d4-8dfd-6409d7cdc0b7.jpg?v=1745828388", completed: false },
+            { id: 12, name: "Leg Press", category: "legs", videoUrl: "https://www.youtube.com/embed/IZxyjW7MPJQ", thumb: "https://bellsofsteel.us/cdn/shop/articles/Unleash-the-Power_-What-Muscles-Do-Leg-Press-Work.webp?v=1714161484&width=1024", completed: false },
+            { id: 13, name: "Crunches", category: "abs", videoUrl: "https://www.youtube.com/embed/Xyd_fa5zoEU", thumb: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8f69gFVZ-3371JjpRWjHNaoJT6hHud5iyZQ&s", completed: false },
+            { id: 14, name: "Leg Raises", category: "abs", videoUrl: "https://www.youtube.com/embed/l4kQd9eWclE", thumb: "https://cdn.mos.cms.futurecdn.net/5Yo7oSABWE77FzwPDKiGJB.jpg", completed: false },
+        ];
+
+        // Updated Nutrition Data
+        const meals = [
+            { id: 101, name: "Chicken Breast", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165 },
+
+            { id: 102, name: "Salmon Fillet", category: "energy", protein: 25, carbs: 0, fat: 13, kcal: 208 }, 
+
+            { id: 103, name: "Whey Protein", category: "protein", protein: 24, carbs: 3, fat: 1, kcal: 120 },
+
+            { id: 104, name: "White Rice", category: "carbs", protein: 4, carbs: 45, fat: 0, kcal: 206 },
+
+            { id: 105, name: "Avocado", category: "facts", protein: 2, carbs: 9, fat: 15, kcal: 160 }, 
+
+
+            { id: 106, name: "Peanut Butter", category: "energy", protein: 8, carbs: 6, fat: 16, kcal: 190 },
+
+            { id: 107, name: "Eggs", category: "facts", protein: 6, carbs: 1, fat: 5, kcal: 78 },
+            { id: 108, name: "Oatmeal", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 109, name: "Almonds", category: "facts", protein: 6, carbs: 6, fat: 14, kcal: 164 },
+            { id: 110, name: "Steak", category: "energy", protein: 26, carbs: 0, fat: 20, kcal: 271 },
+
+            { id: 111, name: "Turkey", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165 },
+            { id: 112, name: "Tuna", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 113, name: "Cod", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 114, name: "Chia Seeds", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 115, name: "Greek Yogurt", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 116, name: "Cottage Cheese", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 117, name: "Milk", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 118, name: "Lentils", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 119, name: "Black Beans", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 120, name: "Almonds", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 121, name: "Peanuts", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 122, name: "Tofu", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+            { id: 123, name: "Tempeh", category: "protein", protein: 30, carbs: 0, fat: 3, kcal: 165  },
+
+
+            { id: 124, name: "Oats", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 125, name: "Brown Rice", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 126, name: "Quinoa", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 127, name: "Sweet Potatoes", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 128, name: "Bananas", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 129, name: "Berries", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 130, name: "Apples", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 131, name: "Beans", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+            { id: 132, name: "Lentils", category: "carbs", protein: 6, carbs: 32, fat: 3, kcal: 158 },
+
+
+            { id: 133, name: "Bananas", category: "energy", protein: 26, carbs: 0, fat: 20, kcal: 271 },
+            { id: 134, name: "Apples", category: "energy", protein: 26, carbs: 0, fat: 20, kcal: 271 },
+            { id: 135, name: "Watermelon", category: "energy", protein: 26, carbs: 0, fat: 20, kcal: 271 },
+      
+
+            
+    
+   
+
+            
+            
+     
+
+            
+        ];
+
+        // --- STATE ---
+        let currentExerciseFilter = 'all';
+        let currentNutritionFilter = 'all';
+        let selectedMeals = new Set();
+        let weightData = [];
+        let daysCount = 3;
+        let timerInterval;
+        let audioCtx;
+
+        // --- LOGIN ---
+        function checkLogin() {
+            const pass = document.getElementById('password-input').value;
+            if (pass === '1234') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                initApp();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function initApp() {
+            renderExercises();
+            renderNutrition();
+            initWeightTable();
+            const memInput = document.getElementById('membership-input');
+            const memDisplay = document.getElementById('membership-display');
+            memDisplay.innerText = memInput.value;
+            memInput.addEventListener('input', (e) => memDisplay.innerText = e.target.value || 'Guest');
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('section-exercise').classList.add('hidden');
+            document.getElementById('section-nutrition').classList.add('hidden');
+            document.getElementById('section-weight').classList.add('hidden');
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+        }
+
+        // --- EXERCISE LOGIC ---
+        function setExerciseFilter(cat) {
+            currentExerciseFilter = cat;
+            const btns = document.querySelectorAll('#exercise-filters .filter-btn');
+            btns.forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText.toLowerCase() === cat || (cat === 'arm' && b.innerText.toLowerCase() === 'arm') || (cat === 'legs' && b.innerText.toLowerCase() === 'legs')) {
+                    b.classList.add('active');
+                }
+            });
+            renderExercises();
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercise-list');
+            const search = document.getElementById('exercise-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = exercises.filter(ex => {
+                const matchCat = currentExerciseFilter === 'all' || ex.category === currentExerciseFilter;
+                const matchSearch = ex.name.toLowerCase().includes(search);
+                return matchCat && matchSearch;
+            });
+
+            filtered.forEach(ex => {
+                const div = document.createElement('div');
+                div.className = `card ${ex.completed ? 'completed' : ''}`;
+                
+                div.innerHTML = `
+                    <div class="card-thumb" onclick="openVideo('${ex.videoUrl}', '${ex.name}')">
+                        <img src="${ex.thumb}" alt="${ex.name}">
+                        <div class="play-overlay">▶</div>
+                        <div class="done-badge">DONE</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${ex.name}</div>
+                        <span class="card-badge">${ex.category}</span>
+                        <button class="btn btn-done ${ex.completed ? 'active' : ''}" onclick="event.stopPropagation(); toggleExercise(${ex.id})">
+                            ${ex.completed ? 'Completed' : 'Mark Done'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleExercise(id) {
+            const ex = exercises.find(e => e.id === id);
+            if(ex) {
+                ex.completed = !ex.completed;
+                renderExercises();
+                if(ex.completed) {
+                    startTimer();
+                }
+            }
+        }
+
+        // --- TIMER & SOUND ---
+        function startTimer() {
+            const modal = document.getElementById('timer-modal');
+            const display = document.getElementById('timer-text');
+            modal.classList.remove('hidden');
+            
+
+
+
+
+
+
+
+
+
+            let timeLeft = 3; // 3 minutes
+            updateTimerDisplay(timeLeft);
+
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    playAlarm();
+                    modal.classList.add('hidden');
+                }
+            }, 1000);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-modal').classList.add('hidden');
+        }
+
+        function updateTimerDisplay(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-text').innerText = `${m}:${s}`;
+        }
+
+        function playAlarm() {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 880; // Ring tone pitch
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1.5);
+            oscillator.start();
+            
+            oscillator.stop(audioCtx.currentTime + 1.5);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // --- VIDEO MODAL ---
+        function openVideo(url, title) {
+            const modal = document.getElementById('video-modal');
+            const container = document.getElementById('video-player-container');
+            document.getElementById('video-title-display').innerText = title;
+            modal.classList.remove('hidden');
+            container.innerHTML = `<iframe width="100%" height="100%" src="${url}?autoplay=1" frameborder="0" allowfullscreen></iframe>`;
+        }
+        function closeVideo() {
+            const modal = document.getElementById('video-modal');
+            modal.classList.add('hidden');
+            document.getElementById('video-player-container').innerHTML = ''; 
+        }
+
+        // --- NUTRITION LOGIC ---
+        function setNutritionFilter(cat) {
+            currentNutritionFilter = cat;
+            const btns = document.querySelectorAll('#nutrition-filters .filter-btn');
+            btns.forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText.toLowerCase() === cat) b.classList.add('active');
+            });
+            renderNutrition();
+        }
+
+        function renderNutrition() {
+            const container = document.getElementById('meal-list');
+            const search = document.getElementById('nutrition-search').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = meals.filter(m => {
+                const matchCat = currentNutritionFilter === 'all' || m.category === currentNutritionFilter;
+                const matchSearch = m.name.toLowerCase().includes(search);
+                return matchCat && matchSearch;
+            });
+
+            filtered.forEach(meal => {
+                const isSelected = selectedMeals.has(meal.id);
+                const div = document.createElement('div');
+                div.className = `meal-list-item ${isSelected ? 'selected' : ''}`;
+                div.onclick = () => toggleMeal(meal.id);
+                div.innerHTML = `
+                    <div class="meal-info">
+                        <h4>${meal.name}</h4>
+                        <div class="meal-macros">
+                            <span style="color:var(--primary)">P:${meal.protein}g</span>
+                            <span style="color:var(--accent-blue)">C:${meal.carbs}g</span>
+                            <span style="color:var(--accent-purple)">F:${meal.fat}g</span>
+                            <span style="color:var(--accent-orange)">K:${meal.kcal}</span>
+                        </div>
+                    </div>
+                    <div class="check-indicator">${isSelected ? '✓' : ''}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleMeal(id) {
+            if(selectedMeals.has(id)) selectedMeals.delete(id);
+            else selectedMeals.add(id);
+            renderNutrition();
+            updateTracker();
+        }
+
+        function updateTracker() {
+            let p=0, c=0, f=0, k=0;
+            selectedMeals.forEach(id => {
+                const m = meals.find(x => x.id === id);
+                if(m) { p+=m.protein; c+=m.carbs; f+=m.fat; k+=m.kcal; }
+            });
+            
+            document.getElementById('text-protein').innerText = p+'g';
+            document.getElementById('text-carbs').innerText = c+'g';
+            document.getElementById('text-fat').innerText = f+'g';
+            document.getElementById('text-kcal').innerText = k;
+
+            setCircle('track-protein', p, 200);
+            setCircle('track-carbs', c, 300);
+            setCircle('track-fat', f, 80);
+            setCircle('track-kcal', k, 2500);
+        }
+
+        function setCircle(id, val, max) {
+            const circle = document.getElementById(id);
+            const radius = 27;
+            const circum = 2 * Math.PI * radius; // ~170
+            const percent = Math.min(val / max, 1);
+            circle.style.strokeDashoffset = circum * (1 - percent);
+        }
+
+        // --- WEIGHT LOGIC ---
+        function initWeightTable() {
+            addRowData("Bench Press");
+            addRowData("Squat");
+            renderWeightTable();
+        }
+        function addRowData(name) {
+            weightData.push({ id: Date.now(), name, weights: Array(daysCount).fill('') });
+        }
+        function addExerciseRow() {
+            const name = document.getElementById('new-exercise-name').value.trim();
+            if(!name) return showToast("Enter exercise name");
+            addRowData(name);
+            document.getElementById('new-exercise-name').value = '';
+            renderWeightTable();
+        }
+        function addDayColumn() {
+            daysCount++;
+            weightData.forEach(r => r.weights.push(''));
+            renderWeightTable();
+        }
+        function renderWeightTable() {
+            const thead = document.getElementById('table-header-row');
+            const tbody = document.getElementById('table-body');
+            let h = '<th>Exercise</th>';
+            for(let i=1; i<=daysCount; i++) h += `<th>Day ${i}</th>`;
+            thead.innerHTML = h;
+            tbody.innerHTML = '';
+            weightData.forEach((row, rIdx) => {
+                let tr = `<tr><td><input type="text" value="${row.name}" onchange="updateName(${rIdx}, this.value)"></td>`;
+                row.weights.forEach((w, wIdx) => {
+                    tr += `<td><input type="number" value="${w}" onchange="updateWeight(${rIdx}, ${wIdx}, this.value)"></td>`;
+                });
+                tr += '</tr>';
+                tbody.innerHTML += tr;
+            });
+        }
+        function updateName(r, v) { weightData[r].name = v; }
+        function updateWeight(r, w, v) { weightData[r].weights[w] = v; }
+
+        function sendToWhatsapp() {
+            const mem = document.getElementById('membership-input').value.trim();
+            if(!mem) return showToast("Enter membership number");
+            let msg = `*MEMBERSHIP:* ${mem}\n*WEIGHT PROGRESS:*\n`;
+            weightData.forEach(row => {
+                const wVals = row.weights.map((w,i) => w ? `D${i+1}:${w}kg` : '').filter(Boolean).join(', ');
+                msg += `\n▪️ ${row.name}: ${wVals || 'No data'}`;
+            });
+            window.open(`https://wa.me/94740802427?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function showToast(t) {
+            const el = document.getElementById('toast');
+            el.innerText = t; el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+    </script>
+</body>
+</html>
