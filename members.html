@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Management System</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --gray: #9ca3af;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Login Overlay --- */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-box h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* --- Main Layout --- */
+        header {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Form Section --- */
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            margin-bottom: 2rem;
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Special styling for phone input with prefix */
+        .phone-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .phone-prefix {
+            position: absolute;
+            left: 10px;
+            color: #6b7280;
+            font-weight: bold;
+        }
+        .phone-wrapper input {
+            padding-left: 45px; /* space for 94 */
+            width: 100%;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        /* --- Table Section --- */
+        .table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        /* Status Colors */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-due { background: #fee2e2; color: #991b1b; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+
+        /* Action Buttons in Table */
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .whatsapp-btn {
+            color: white;
+            background-color: var(--gray); /* Default gray */
+            cursor: not-allowed;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .whatsapp-btn.active {
+            background-color: var(--success); /* Green when active */
+            cursor: pointer;
+        }
+
+        .btn-activate {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-activate:hover { background-color: #2563eb; }
+
+        .btn-delete {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+        .btn-delete:hover { background-color: #fecaca; }
+
+        /* --- Modals & Toasts --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+        }
+
+        .modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2> ONLY ADMIN</h2>
+            <div class="form-group">
+                <input type="password" id="admin-password" placeholder="Enter Password" onkeypress="handleEnter(event)">
+            </div>
+            <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="checkPassword()">Unlock System</button>
+            <p id="login-error" style="color: red; margin-top: 0.5rem; display: none;">Incorrect Password</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <header>
+        <h1>Member Manager</h1>
+        <button class="btn-logout" onclick="logout()">Lock Screen</button>
+    </header>
+
+    <main>
+        <!-- Add Member Form -->
+        <section class="card">
+            <h3>Add New Member</h3>
+            <form id="add-member-form" onsubmit="addMember(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Member ID</label>
+                        <input type="text" id="mem-id" placeholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="mem-name" placeholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <div class="phone-wrapper">
+                            <span class="phone-prefix">94</span>
+                            <input type="tel" id="mem-phone" placeholder="" required oninput="validatePhone(this)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Day (Date)</label>
+                        <select id="mem-day" required>
+                            <!-- Options generated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Fee</label>
+                        <input type="number" id="mem-fee" placeholder="" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Member</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Member List -->
+        <section class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Due Date</th>
+                        <th>Fee</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="members-table-body">
+                    <!-- Rows rendered by JS -->
+                </tbody>
+            </table>
+            <div id="empty-state" class="empty-state">No members found. Add one above.</div>
+        </section>
+    </main>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="color: var(--danger)">Confirm Deletion</h3>
+            <p>Are you sure you want to delete <b id="delete-name"></b>?</p>
+            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">(This action cannot be undone)</p>
+            <div class="modal-actions">
+                <button class="btn btn-delete" id="confirm-delete-btn">Yes, Delete</button>
+                <button class="btn" style="background: #e5e7eb;" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Action Successful</div>
+
+    <script>
+
+
+
+
+
+
+
+        // --- CONFIGURATION ---
+        const ADMIN_PASS = "LDF"; // Simple password
+        let members = [];
+        let deleteTargetId = null;
+
+
+
+
+
+
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMembers();
+            generateDayOptions();
+            renderTable();
+            // Check if session is active (simple session check)
+            if (sessionStorage.getItem('isAdmin') === 'true') {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+        });
+
+        function handleEnter(e) {
+            if(e.key === 'Enter') checkPassword();
+        }
+
+        // --- AUTHENTICATION ---
+        function checkPassword() {
+            const input = document.getElementById('admin-password').value;
+            if (input === ADMIN_PASS) {
+                document.getElementById('login-overlay').style.display = 'none';
+                sessionStorage.setItem('isAdmin', 'true');
+                document.getElementById('login-error').style.display = 'none';
+                document.getElementById('admin-password').value = '';
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            location.reload();
+        }
+
+        // --- DATA MANAGEMENT ---
+        function loadMembers() {
+            const saved = localStorage.getItem('myWebsiteMembers');
+            if (saved) {
+                members = JSON.parse(saved);
+            }
+        }
+
+        function saveMembers() {
+            localStorage.setItem('myWebsiteMembers', JSON.stringify(members));
+        }
+
+        function generateDayOptions() {
+            const select = document.getElementById('mem-day');
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.text = i;
+                select.appendChild(option);
+            }
+        }
+
+        function validatePhone(input) {
+            // Remove non-numeric chars
+            input.value = input.value.replace(/[^0-9]/g, '');
+        }
+
+        // --- CORE LOGIC ---
+        function addMember(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('mem-id').value.trim();
+            const name = document.getElementById('mem-name').value.trim();
+            let phone = document.getElementById('mem-phone').value.trim();
+            const day = parseInt(document.getElementById('mem-day').value);
+            const fee = document.getElementById('mem-fee').value;
+
+            // Auto-add 94 if user didn't type it, but we handled UI prefix.
+            // Clean logic: ensure it starts with the number part, we store full number.
+            // The UI shows "94", the user types "7...", we combine them.
+            // However, the user might paste a full number. Let's strip leading 0 or 94 if present in input
+            if(phone.startsWith('0')) phone = phone.substring(1);
+            // If input is "712345678", final is "94712345678"
+
+            const fullPhone = "94" + phone;
+
+            // Check Duplicate ID
+            if (members.some(m => m.id === id)) {
+                showToast("Error: Member ID already exists!");
+                return;
+            }
+
+            const newMember = {
+                id,
+                name,
+                phone: fullPhone,
+                dueDay: day,
+                fee,
+                isPaid: false, // Default status
+                lastPaidMonth: null // To track if payment is for this month
+            };
+
+            members.push(newMember);
+            saveMembers();
+            renderTable();
+            
+            // Reset form
+            e.target.reset();
+            showToast("Member Added Successfully");
+        }
+
+        function deleteMember(id) {
+            deleteTargetId = id;
+            const member = members.find(m => m.id === id);
+            document.getElementById('delete-name').innerText = member.name;
+            document.getElementById('delete-modal').style.display = 'flex';
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+            if (deleteTargetId) {
+                members = members.filter(m => m.id !== deleteTargetId);
+                saveMembers();
+                renderTable();
+                showToast("Member Deleted");
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+            deleteTargetId = null;
+        }
+
+        function activateMember(id) {
+            const member = members.find(m => m.id === id);
+            if (member) {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+
+                member.isPaid = true;
+                member.lastPaidMonth = `${currentYear}-${currentMonth}`; // Store YYYY-MM string
+                saveMembers();
+                renderTable();
+                showToast(`Payment recorded for ${member.name}`);
+            }
+        }
+
+        // --- UI RENDERING & STATUS LOGIC ---
+        function renderTable() {
+            const tbody = document.getElementById('members-table-body');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '';
+
+            if (members.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            const today = new Date();
+            const currentDay = today.getDate();
+            const currentMonthIndex = today.getMonth();
+            const currentYear = today.getFullYear();
+            const currentMonthStr = `${currentYear}-${currentMonthIndex}`;
+
+            members.forEach(m => {
+                const tr = document.createElement('tr');
+                
+                // --- LOGIC: DETERMINE STATUS ---
+                // 1. Check if paid for current month
+                const isPaidCurrentMonth = (m.isPaid && m.lastPaidMonth === currentMonthStr);
+
+                let statusHtml = '';
+                let whatsappClass = ''; // Default gray
+                let whatsappDisabled = true;
+                let activateDisplay = '';
+
+                // Due date logic
+                // "Set the button to green the day before payment and to gray afterwards"
+                // We assume "Day before" means (Due Day - 1).
+                // If today is >= (Due Day - 1), it's "Time to pay".
+                
+                const paymentWindowStart = m.dueDay - 1;
+                // Handle end of month wrap (e.g. Due day 1, window starts day 31 of prev month)
+                // Simplified logic for this tool: strictly compare numbers.
+                // If due day is 5, green starts day 4.
+
+                let isDueTime = false;
+                
+                // If Due Day is 1st, window starts last day of prev month (approx 30/31). 
+                // Simplified: If Due Day is 5, window starts 4th.
+                if (currentDay >= paymentWindowStart) {
+                    isDueTime = true;
+                }
+
+                if (isPaidCurrentMonth) {
+                    // Case: Paid
+                    statusHtml = '<span class="status-badge status-paid">Paid</span>';
+                    whatsappClass = ''; // Gray
+                    whatsappDisabled = true;
+                    activateDisplay = 'none'; // Hide activate button
+                } else {
+                    // Case: Not Paid
+                    if (isDueTime) {
+                        // Case: Due (or Overdue) -> Needs Attention
+                        statusHtml = '<span class="status-badge status-due">Payment Due</span>';
+                        whatsappClass = 'active'; // GREEN
+                        whatsappDisabled = false;
+                        activateDisplay = 'inline-block';
+                    } else {
+                        // Case: Not due yet
+                        statusHtml = '<span class="status-badge status-pending">Upcoming</span>';
+                        whatsappClass = ''; // Gray
+                        whatsappDisabled = true;
+                        // Even if not due, maybe allow activation if paid early? 
+                        // Prompt says "Once a member pays... activate". 
+                        // Let's keep activate visible just in case, or hidden. 
+                        // User logic implies activate is related to the flow. 
+                        // Let's hide activate if not due to keep UI clean, unless user wants to pre-pay.
+                        // But usually "Activate" is for admin to confirm payment. 
+                        // We will show Activate if Green.
+                        activateDisplay = 'none'; 
+                    }
+                }
+
+                // Construct WhatsApp Link
+                // Text: "auto type member ID,name,payment date,payment fees"
+                const msg = `Hello ${m.name} (ID: ${m.id}), Your payment of ${m.fee} is due on the ${m.dueDay}. Please pay to continue your membership.`;
+                const waLink = `https://wa.me/${m.phone}?text=${encodeURIComponent(msg)}`;
+
+                tr.innerHTML = `
+                    <td><b>${m.id}</b></td>
+                    <td>${m.name}</td>
+                    <td>
+                        <a href="https://wa.me/${m.phone}" target="_blank" style="text-decoration:none; color:var(--primary);">
+                            ${m.phone}
+                        </a>
+                    </td>
+                    <td>Every month on <b>${m.dueDay}</b></td>
+                    <td>${m.fee}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <a href="${waLink}" class="action-btn whatsapp-btn ${whatsappClass}" 
+                           ${whatsappDisabled ? 'onclick="return false;"' : ''}>
+                           ${whatsappDisabled ? 'Wait' : 'Send Msg'}
+                        </a>
+                        
+                        <button class="action-btn btn-activate" 
+                                style="display: ${activateDisplay}"
+                                onclick="activateMember('${m.id}')">
+                            Activate Pay
+                        </button>
+
+                        <button class="action-btn btn-delete" onclick="deleteMember('${m.id}')">
+                            Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- UTILS ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('delete-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
