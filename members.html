@@ -3,409 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Management System</title>
+    <title> Smart Alerts</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --success: #22c55e;
+            --wa-green: #25D366;
+            --wa-gray: #cbd5e1;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
             --danger: #ef4444;
-            --gray: #9ca3af;
-            --bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text: #1f2937;
-            --border: #e5e7eb;
+            --warning: #f59e0b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        /* --- LOCK SCREEN --- */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 2000;
         }
-
-        /* --- Login Overlay --- */
-        #login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
         .login-box {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: var(--card); padding: 2.5rem; border-radius: 12px;
+            width: 340px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        .login-box h2 { margin-bottom: 1rem; color: var(--primary); }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 6px; }
+        .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; }
 
-        .login-box h2 {
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        /* --- Main Layout --- */
+        /* --- DASHBOARD --- */
+        #dashboard { display: none; height: 100vh; flex-direction: column; }
+        
         header {
-            background: var(--card-bg);
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--card); padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
 
-        header h1 {
-            font-size: 1.5rem;
-            color: var(--primary);
+        /* Notification Bell */
+        .notif-wrap { position: relative; cursor: pointer; margin-right: 20px; }
+        .bell-icon { font-size: 1.4rem; color: #64748b; }
+        .bell-badge {
+            position: absolute; top: -5px; right: -5px; background: var(--danger);
+            color: white; font-size: 0.75rem; width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; display: none;
         }
+        .notif-dropdown {
+            position: absolute; top: 50px; right: 0; width: 300px; background: white;
+            border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px; display: none; z-index: 100; max-height: 400px; overflow-y: auto;
+        }
+        .notif-item { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .notif-item.due-tomorrow { border-left: 3px solid var(--warning); background: #fffbeb; }
+        .notif-item.overdue { border-left: 3px solid var(--danger); background: #fef2f2; }
 
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        main { flex: 1; padding: 2rem; overflow-y: auto; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .grid { display: grid; grid-template-columns: 320px 1fr; gap: 2rem; }
+        .card { background: var(--card); padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem; }
+        
+        /* Form */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 10px;}
 
-        .btn-logout:hover {
-            background: var(--danger);
-            color: white;
-        }
+        /* Backup Buttons */
+        .backup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-backup { padding: 10px; font-size: 0.85rem; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-download { background: #0f172a; }
+        .btn-upload { background: #64748b; }
 
-        main {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        th { background: #f8fafc; color: #64748b; font-size: 0.8rem; text-transform: uppercase; }
+        
+        /* Action Buttons */
+        .btn-pay { padding: 6px 12px; background: #0f172a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-delete { padding: 6px 12px; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        
+        /* WhatsApp Button Logic */
+        .btn-wa {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border: none; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+            transition: 0.2s;
         }
-
-        /* --- Form Section --- */
-        .card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            margin-bottom: 2rem;
-        }
-
-        .card h3 {
-            margin-bottom: 1rem;
-            border-bottom: 2px solid var(--bg);
-            padding-bottom: 0.5rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            align-items: end;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #4b5563;
-        }
-
-        .form-group input, .form-group select {
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* Special styling for phone input with prefix */
-        .phone-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .phone-prefix {
-            position: absolute;
-            left: 10px;
-            color: #6b7280;
-            font-weight: bold;
-        }
-        .phone-wrapper input {
-            padding-left: 45px; /* space for 94 */
-            width: 100%;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        /* --- Table Section --- */
-        .table-container {
-            overflow-x: auto;
-            background: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background: #f9fafb;
-            font-weight: 600;
-            color: #4b5563;
-        }
-
-        /* Status Colors */
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .status-paid { background: #d1fae5; color: #065f46; }
+        /* GREEN: Day before, Today, Overdue (Alert is Active) */
+        .btn-wa.green { background: var(--wa-green); color: white; box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2); }
+        .btn-wa.green:hover { background: #1ebc57; }
+        /* GRAY: Future (No Alert) */
+        .btn-wa.gray { background: var(--wa-gray); color: #475569; cursor: default; }
+        
+        /* Status Indicator */
+        .status { font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; }
+        .status-active { background: #dcfce7; color: #166534; }
         .status-due { background: #fee2e2; color: #991b1b; }
-        .status-pending { background: #fef3c7; color: #92400e; }
 
-        /* Action Buttons in Table */
-        .action-btn {
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            margin-right: 0.5rem;
-            border: 1px solid transparent;
-            cursor: pointer;
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 30px; right: 30px; background: #0f172a; color: white;
+            padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transform: translateY(100px); transition: transform 0.3s; z-index: 2000;
         }
-
-        .whatsapp-btn {
-            color: white;
-            background-color: var(--gray); /* Default gray */
-            cursor: not-allowed;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .whatsapp-btn.active {
-            background-color: var(--success); /* Green when active */
-            cursor: pointer;
-        }
-
-        .btn-activate {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .btn-activate:hover { background-color: #2563eb; }
-
-        .btn-delete {
-            background-color: #fee2e2;
-            color: var(--danger);
-        }
-        .btn-delete:hover { background-color: #fecaca; }
-
-        /* --- Modals & Toasts --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 500;
-        }
-
-        .modal {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 6px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s;
-            z-index: 2000;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #6b7280;
-        }
-
+        #toast.show { transform: translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN OVERLAY -->
-    <div id="login-overlay">
+    <!-- 1. LOCK SCREEN -->
+    <div id="lock-screen">
         <div class="login-box">
-            <h2> ONLY ADMIN</h2>
-            <div class="form-group">
-                <input type="password" id="admin-password" placeholder="Enter Password" onkeypress="handleEnter(event)">
-            </div>
-            <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="checkPassword()">Unlock System</button>
-            <p id="login-error" style="color: red; margin-top: 0.5rem; display: none;">Incorrect Password</p>
+            <h2><i class="fas fa-user-shield"></i> Admin Only</h2>
+            <input type="password" id="adminPass" placeholder="Enter Password (Default: admin)">
+            <button onclick="unlockSystem()">Unlock</button>
+            <div class="error" id="errorMsg">Incorrect Password</div>
         </div>
     </div>
 
-    <!-- MAIN APP CONTENT -->
-    <header>
-        <h1>Member Manager</h1>
-        <button class="btn-logout" onclick="logout()">Lock Screen</button>
-    </header>
+    <!-- 2. DASHBOARD -->
+    <div id="dashboard" style="display:none;">
+        <header>
+            <div class="brand"><i class="fas fa-dumbbell" style="color: var(--primary);"></i> LDF System</div>
+            <div style="display:flex; align-items:center;">
+                <!-- ALERT BELL -->
+                <div class="notif-wrap" onclick="toggleDropdown()">
+                    <i class="fas fa-bell bell-icon"></i>
+                    <div class="bell-badge" id="bellBadge">0</div>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">Payment Alerts</div>
+                        <div id="notifList"></div>
+                    </div>
+                </div>
+                <button onclick="location.reload()" style="border:none; background:none; cursor:pointer; color:#64748b;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </header>
 
-    <main>
-        <!-- Add Member Form -->
-        <section class="card">
-            <h3>Add New Member</h3>
-            <form id="add-member-form" onsubmit="addMember(event)">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Member ID</label>
-                        <input type="text" id="mem-id" placeholder="" required>
+        <main>
+            <div class="grid">
+                <!-- Left Column: Form & Backup -->
+                <div>
+                    <!-- Add Member -->
+                    <div class="card">
+                        <h3>Add New Member</h3>
+                        <form onsubmit="addMember(event)">
+                            <div class="form-group">
+                                <label>Member Name</label>
+                                <input type="text" id="mName" required placeholder="e.g. John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone (Auto 94)</label>
+                                <input type="tel" id="mPhone" required placeholder="e.g. 712345678" oninput="updatePhonePreview()">
+                                <small style="color:#64748b; font-size:0.75rem;">Saved as: <strong id="phonePreview">94...</strong></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Monthly Fee</label>
+                                <input type="number" id="mFee" required placeholder="e.g. 2000">
+                            </div>
+                            <div class="form-group">
+                                <label>Member ID (Auto)</label>
+                                <input type="text" id="mId" readonly style="background:#f1f5f9;">
+                            </div>
+                            <div class="form-group">
+                                <label>Next Payment Day</label>
+                                <input type="date" id="mDate" required>
+                            </div>
+                            <button type="submit" class="btn-add">Register Member</button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="mem-name" placeholder="" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <div class="phone-wrapper">
-                            <span class="phone-prefix">94</span>
-                            <input type="tel" id="mem-phone" placeholder="" required oninput="validatePhone(this)">
+
+                    <!-- Backup System -->
+                    <div class="card">
+                        <h3><i class="fas fa-database"></i> Data Backup</h3>
+                        <p style="font-size:0.85rem; color:#64748b; margin-bottom:10px;">Download data to save, or upload to restore.</p>
+                        <div class="backup-grid">
+                            <button class="btn-backup btn-download" onclick="downloadBackup()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="btn-backup btn-upload" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
+                            <input type="file" id="fileInput" style="display:none" accept=".json" onchange="uploadBackup(this)">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Payment Day (Date)</label>
-                        <select id="mem-day" required>
-                            <!-- Options generated by JS -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Payment Fee</label>
-                        <input type="number" id="mem-fee" placeholder="" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Member</button>
                 </div>
-            </form>
-        </section>
 
-        <!-- Member List -->
-        <section class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Due Date</th>
-                        <th>Fee</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="members-table-body">
-                    <!-- Rows rendered by JS -->
-                </tbody>
-            </table>
-            <div id="empty-state" class="empty-state">No members found. Add one above.</div>
-        </section>
-    </main>
-
-    <!-- DELETE CONFIRMATION MODAL -->
-    <div id="delete-modal" class="modal-overlay">
-        <div class="modal">
-            <h3 style="color: var(--danger)">Confirm Deletion</h3>
-            <p>Are you sure you want to delete <b id="delete-name"></b>?</p>
-            <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">(This action cannot be undone)</p>
-            <div class="modal-actions">
-                <button class="btn btn-delete" id="confirm-delete-btn">Yes, Delete</button>
-                <button class="btn" style="background: #e5e7eb;" onclick="closeModal()">Cancel</button>
+                <!-- Right Column: List -->
+                <div class="card">
+                    <h3>Members List</h3>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Fee</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>WhatsApp</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- JS populates this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="toast">Action Successful</div>
+    <div id="toast">Action Saved</div>
 
     <script>
 
@@ -414,289 +227,290 @@
 
 
 
-
         // --- CONFIGURATION ---
-        const ADMIN_PASS = "LDF"; // Simple password
-        let members = [];
-        let deleteTargetId = null;
+        const PASS = "LDF"; 
+        const DB_KEY = "gym_system_alerts_v5";
+        let members = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        let startId = 1001;
 
 
 
 
 
 
+
+
+
+
+
+        // --- AUTH ---
+        function unlockSystem() {
+            const input = document.getElementById('adminPass').value;
+            if (input === PASS) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                initApp();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadMembers();
-            generateDayOptions();
+        function initApp() {
+            generateID();
+            document.getElementById('mDate').valueAsDate = new Date();
             renderTable();
-            // Check if session is active (simple session check)
-            if (sessionStorage.getItem('isAdmin') === 'true') {
-                document.getElementById('login-overlay').style.display = 'none';
-            }
-        });
-
-        function handleEnter(e) {
-            if(e.key === 'Enter') checkPassword();
+            checkAlerts(); // Run Alert Logic
         }
 
-        // --- AUTHENTICATION ---
-        function checkPassword() {
-            const input = document.getElementById('admin-password').value;
-            if (input === ADMIN_PASS) {
-                document.getElementById('login-overlay').style.display = 'none';
-                sessionStorage.setItem('isAdmin', 'true');
-                document.getElementById('login-error').style.display = 'none';
-                document.getElementById('admin-password').value = '';
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
+        function generateID() {
+            const next = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : startId;
+            document.getElementById('mId').value = next;
         }
 
-        function logout() {
-            sessionStorage.removeItem('isAdmin');
-            location.reload();
+        function updatePhonePreview() {
+            const val = document.getElementById('mPhone').value;
+            document.getElementById('phonePreview').innerText = "94" + val;
         }
 
-        // --- DATA MANAGEMENT ---
-        function loadMembers() {
-            const saved = localStorage.getItem('myWebsiteMembers');
-            if (saved) {
-                members = JSON.parse(saved);
-            }
-        }
-
-        function saveMembers() {
-            localStorage.setItem('myWebsiteMembers', JSON.stringify(members));
-        }
-
-        function generateDayOptions() {
-            const select = document.getElementById('mem-day');
-            for (let i = 1; i <= 31; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.text = i;
-                select.appendChild(option);
-            }
-        }
-
-        function validatePhone(input) {
-            // Remove non-numeric chars
-            input.value = input.value.replace(/[^0-9]/g, '');
-        }
-
-        // --- CORE LOGIC ---
+        // --- ADD MEMBER ---
         function addMember(e) {
             e.preventDefault();
+            const name = document.getElementById('mName').value;
+            let phone = document.getElementById('mPhone').value;
+            const fee = document.getElementById('mFee').value;
+            const id = parseInt(document.getElementById('mId').value);
+            const date = document.getElementById('mDate').value;
 
-            const id = document.getElementById('mem-id').value.trim();
-            const name = document.getElementById('mem-name').value.trim();
-            let phone = document.getElementById('mem-phone').value.trim();
-            const day = parseInt(document.getElementById('mem-day').value);
-            const fee = document.getElementById('mem-fee').value;
-
-            // Auto-add 94 if user didn't type it, but we handled UI prefix.
-            // Clean logic: ensure it starts with the number part, we store full number.
-            // The UI shows "94", the user types "7...", we combine them.
-            // However, the user might paste a full number. Let's strip leading 0 or 94 if present in input
-            if(phone.startsWith('0')) phone = phone.substring(1);
-            // If input is "712345678", final is "94712345678"
-
-            const fullPhone = "94" + phone;
-
-            // Check Duplicate ID
-            if (members.some(m => m.id === id)) {
-                showToast("Error: Member ID already exists!");
-                return;
+            // Auto prefix 94
+            phone = phone.replace(/\D/g, '');
+            if (!phone.startsWith('94')) {
+                phone = '94' + phone;
             }
 
-            const newMember = {
-                id,
-                name,
-                phone: fullPhone,
-                dueDay: day,
-                fee,
-                isPaid: false, // Default status
-                lastPaidMonth: null // To track if payment is for this month
-            };
+            members.push({ id, name, phone, fee, nextDue: date });
+            saveData();
 
-            members.push(newMember);
-            saveMembers();
-            renderTable();
-            
-            // Reset form
             e.target.reset();
-            showToast("Member Added Successfully");
+            generateID();
+            document.getElementById('mDate').valueAsDate = new Date();
+            document.getElementById('phonePreview').innerText = "94...";
+            renderTable();
+            checkAlerts();
+            showToast("Member Added & Saved");
         }
 
-        function deleteMember(id) {
-            deleteTargetId = id;
-            const member = members.find(m => m.id === id);
-            document.getElementById('delete-name').innerText = member.name;
-            document.getElementById('delete-modal').style.display = 'flex';
-        }
-
-        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
-            if (deleteTargetId) {
-                members = members.filter(m => m.id !== deleteTargetId);
-                saveMembers();
-                renderTable();
-                showToast("Member Deleted");
-                closeModal();
-            }
-        });
-
-        function closeModal() {
-            document.getElementById('delete-modal').style.display = 'none';
-            deleteTargetId = null;
-        }
-
-        function activateMember(id) {
-            const member = members.find(m => m.id === id);
-            if (member) {
-                const today = new Date();
-                const currentMonth = today.getMonth();
-                const currentYear = today.getFullYear();
-
-                member.isPaid = true;
-                member.lastPaidMonth = `${currentYear}-${currentMonth}`; // Store YYYY-MM string
-                saveMembers();
-                renderTable();
-                showToast(`Payment recorded for ${member.name}`);
-            }
-        }
-
-        // --- UI RENDERING & STATUS LOGIC ---
-        function renderTable() {
-            const tbody = document.getElementById('members-table-body');
-            const emptyState = document.getElementById('empty-state');
-            tbody.innerHTML = '';
-
-            if (members.length === 0) {
-                emptyState.style.display = 'block';
-                return;
-            }
-            emptyState.style.display = 'none';
-
+        // --- ALERT LOGIC (CORE REQUIREMENT) ---
+        function checkAlerts() {
             const today = new Date();
-            const currentDay = today.getDate();
-            const currentMonthIndex = today.getMonth();
-            const currentYear = today.getFullYear();
-            const currentMonthStr = `${currentYear}-${currentMonthIndex}`;
+            today.setHours(0,0,0,0);
+
+            let alertCount = 0;
+            const list = document.getElementById('notifList');
+            list.innerHTML = '';
 
             members.forEach(m => {
-                const tr = document.createElement('tr');
+                const due = new Date(m.nextDue);
+                due.setHours(0,0,0,0);
                 
-                // --- LOGIC: DETERMINE STATUS ---
-                // 1. Check if paid for current month
-                const isPaidCurrentMonth = (m.isPaid && m.lastPaidMonth === currentMonthStr);
+                const diffTime = due - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                let statusHtml = '';
-                let whatsappClass = ''; // Default gray
-                let whatsappDisabled = true;
-                let activateDisplay = '';
-
-                // Due date logic
-                // "Set the button to green the day before payment and to gray afterwards"
-                // We assume "Day before" means (Due Day - 1).
-                // If today is >= (Due Day - 1), it's "Time to pay".
+                // LOGIC: 
+                // Alert comes ONE DAY BEFORE (diffDays === 1)
+                // Alert continues AFTER DUE (diffDays <= 0)
+                // Alert GOES OFF when diffDays > 1 (Future)
                 
-                const paymentWindowStart = m.dueDay - 1;
-                // Handle end of month wrap (e.g. Due day 1, window starts day 31 of prev month)
-                // Simplified logic for this tool: strictly compare numbers.
-                // If due day is 5, green starts day 4.
-
-                let isDueTime = false;
-                
-                // If Due Day is 1st, window starts last day of prev month (approx 30/31). 
-                // Simplified: If Due Day is 5, window starts 4th.
-                if (currentDay >= paymentWindowStart) {
-                    isDueTime = true;
-                }
-
-                if (isPaidCurrentMonth) {
-                    // Case: Paid
-                    statusHtml = '<span class="status-badge status-paid">Paid</span>';
-                    whatsappClass = ''; // Gray
-                    whatsappDisabled = true;
-                    activateDisplay = 'none'; // Hide activate button
-                } else {
-                    // Case: Not Paid
-                    if (isDueTime) {
-                        // Case: Due (or Overdue) -> Needs Attention
-                        statusHtml = '<span class="status-badge status-due">Payment Due</span>';
-                        whatsappClass = 'active'; // GREEN
-                        whatsappDisabled = false;
-                        activateDisplay = 'inline-block';
-                    } else {
-                        // Case: Not due yet
-                        statusHtml = '<span class="status-badge status-pending">Upcoming</span>';
-                        whatsappClass = ''; // Gray
-                        whatsappDisabled = true;
-                        // Even if not due, maybe allow activation if paid early? 
-                        // Prompt says "Once a member pays... activate". 
-                        // Let's keep activate visible just in case, or hidden. 
-                        // User logic implies activate is related to the flow. 
-                        // Let's hide activate if not due to keep UI clean, unless user wants to pre-pay.
-                        // But usually "Activate" is for admin to confirm payment. 
-                        // We will show Activate if Green.
-                        activateDisplay = 'none'; 
+                if (diffDays <= 1) {
+                    alertCount++;
+                    let typeClass = 'due-tomorrow';
+                    let msg = `Due Tomorrow`;
+                    
+                    if (diffDays < 0) {
+                        typeClass = 'overdue';
+                        msg = `Overdue by ${Math.abs(diffDays)} days`;
+                    } else if (diffDays === 0) {
+                        typeClass = 'overdue';
+                        msg = `Due Today`;
                     }
-                }
 
-                // Construct WhatsApp Link
-                // Text: "auto type member ID,name,payment date,payment fees"
-                const msg = `Hello ${m.name} (ID: ${m.id}), Your payment of ${m.fee} is due on the ${m.dueDay}. Please pay to continue your membership.`;
+                    list.innerHTML += `
+                        <div class="notif-item ${typeClass}">
+                            <strong>#${m.id} ${m.name}</strong><br>
+                            <small>${msg}. Fee: $${m.fee}</small>
+                        </div>
+                    `;
+                }
+            });
+
+            const badge = document.getElementById('bellBadge');
+            if (alertCount > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = alertCount;
+            } else {
+                badge.style.display = 'none';
+                list.innerHTML = '<div style="padding:10px; text-align:center; color:#94a3b8;">No payment alerts.</div>';
+            }
+        }
+
+        function toggleDropdown() {
+            const d = document.getElementById('notifDropdown');
+            d.style.display = d.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // --- RENDER LOGIC (COLOR BUTTONS) ---
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            members.sort((a,b) => new Date(a.nextDue) - new Date(b.nextDue));
+
+            members.forEach(m => {
+                const due = new Date(m.nextDue);
+                due.setHours(0,0,0,0);
+                
+                const diffTime = due - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // Logic: Green if diffDays <= 1. Gray if diffDays > 1.
+                // This matches the Alert Logic exactly.
+                const isGreen = diffDays <= 1;
+                
+                let statusHTML = `<span class="status status-active">Active</span>`;
+                if (diffDays < 0) statusHTML = `<span class="status status-due">Overdue</span>`;
+                else if (diffDays === 0) statusHTML = `<span class="status status-due">Due Today</span>`;
+
+                // WhatsApp Logic
+                const msg = `Hello ${m.name}, Payment Reminder. ID: ${m.id}. Due: ${m.nextDue}. Fee: ${m.fee}.`;
                 const waLink = `https://wa.me/${m.phone}?text=${encodeURIComponent(msg)}`;
 
+                const btnColorClass = isGreen ? 'green' : 'gray';
+                const btnText = isGreen ? 'Send Reminder' : 'Paid / Active';
+                const btnIcon = '<i class="fab fa-whatsapp"></i>';
+                const href = isGreen ? `href="${waLink}" target="_blank"` : `href="#" onclick="return false;"`;
+
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><b>${m.id}</b></td>
+                    <td><strong>#${m.id}</strong></td>
                     <td>${m.name}</td>
+                    <td>${m.phone}</td>
+                    <td>${m.fee}</td>
+                    <td>${formatDate(m.nextDue)}</td>
+                    <td>${statusHTML}</td>
                     <td>
-                        <a href="https://wa.me/${m.phone}" target="_blank" style="text-decoration:none; color:var(--primary);">
-                            ${m.phone}
+                        <a ${href} class="btn-wa ${btnColorClass}">
+                            ${btnIcon} ${btnText}
                         </a>
                     </td>
-                    <td>Every month on <b>${m.dueDay}</b></td>
-                    <td>${m.fee}</td>
-                    <td>${statusHtml}</td>
                     <td>
-                        <a href="${waLink}" class="action-btn whatsapp-btn ${whatsappClass}" 
-                           ${whatsappDisabled ? 'onclick="return false;"' : ''}>
-                           ${whatsappDisabled ? 'Wait' : 'Send Msg'}
-                        </a>
-                        
-                        <button class="action-btn btn-activate" 
-                                style="display: ${activateDisplay}"
-                                onclick="activateMember('${m.id}')">
-                            Activate Pay
-                        </button>
-
-                        <button class="action-btn btn-delete" onclick="deleteMember('${m.id}')">
-                            Delete
-                        </button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn-pay" onclick="activateMember(${m.id})"><i class="fas fa-check"></i></button>
+                            <button class="btn-delete" onclick="deleteMember(${m.id})"><i class="fas fa-trash"></i></button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- UTILS ---
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+        // --- ACTIVATE MEMBER (PAY) ---
+        function activateMember(id) {
+            const member = members.find(m => m.id === id);
+            if (member) {
+                const today = new Date().toISOString().split('T')[0];
+                member.nextDue = addMonths(today, 1);
+                saveData();
+                renderTable();
+                checkAlerts(); // Re-run checks to turn off Alert
+                showToast(`Member #${id} Activated! Alert Cleared.`);
+            }
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('delete-modal');
-            if (event.target == modal) {
-                closeModal();
+        // --- DELETE MEMBER ---
+        function deleteMember(id) {
+            // "Listening twice" confirmation
+            const confirmFirst = confirm(`Are you sure you want to delete Member #${id}?`);
+            if (confirmFirst) {
+                const confirmSecond = confirm("This action cannot be undone. Confirm deletion again?");
+                if (confirmSecond) {
+                    members = members.filter(m => m.id !== id);
+                    saveData();
+                    renderTable();
+                    checkAlerts();
+                    showToast("Member Deleted");
+                }
+            }
+        }
+
+        // --- BACKUP SYSTEM ---
+        function downloadBackup() {
+            const dataStr = JSON.stringify(members, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "gym_backup_" + new Date().toISOString().slice(0,10) + ".json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Backup Downloaded");
+        }
+
+        function uploadBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const loadedData = JSON.parse(e.target.result);
+                    if (Array.isArray(loadedData)) {
+                        const confirmRestore = confirm("This will replace current data. Continue?");
+                        if(confirmRestore) {
+                            members = loadedData;
+                            saveData();
+                            renderTable();
+                            checkAlerts();
+                            showToast("Data Restored Successfully");
+                        }
+                    } else {
+                        alert("Invalid backup file.");
+                    }
+                } catch (err) {
+                    alert("Error reading file.");
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // --- HELPERS ---
+        function saveData() { localStorage.setItem(DB_KEY, JSON.stringify(members)); }
+
+        function addMonths(dateStr, months) {
+            const d = new Date(dateStr);
+            d.setMonth(d.getMonth() + months);
+            return d.toISOString().split('T')[0];
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Close dropdown on outside click
+        window.onclick = function(e) {
+            if (!e.target.closest('.notif-wrap')) {
+                document.getElementById('notifDropdown').style.display = 'none';
             }
         }
     </script>

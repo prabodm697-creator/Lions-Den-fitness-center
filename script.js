@@ -380,3 +380,130 @@
                 }, 800); // Matches CSS transition time
             }
         });
+
+
+
+
+
+
+
+
+
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+            
+            const section = document.getElementById('spotlightSection');
+            const progressBars = document.querySelectorAll('.progress-bar-fill');
+            const counterElement = document.querySelector('.years-count');
+            
+            // 1. Intersection Observer for Entrance Animations
+            const observerOptions = {
+                root: null,
+                threshold: 0.2 // Trigger when 20% visible
+            };
+
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        
+                        // Animate Text and Image Containers
+                        const animElements = entry.target.querySelectorAll('.anim-element');
+                        animElements.forEach(el => {
+                            if(el.dataset.direction === 'left') el.classList.add('visible-left');
+                            if(el.dataset.direction === 'right') el.classList.add('visible-right');
+                        });
+
+                        // Trigger Skill Bars
+                        progressBars.forEach(bar => {
+                            const width = bar.getAttribute('data-width');
+                            bar.style.width = width;
+                        });
+
+                        // Trigger Number Counter
+                        animateValue(counterElement, 0, 12, 2000);
+
+                        // Stop observing once animated
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            observer.observe(section);
+        });
+
+        // Helper function for number counter animation
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start) + "+";
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+
+
+
+
+
+
+
+
+          // --- 1. IMAGE PARALLAX EFFECT ---
+        const imageArea = document.getElementById('imageArea');
+        const heroImage = document.getElementById('heroImage');
+
+        imageArea.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = imageArea.getBoundingClientRect();
+            
+            // Calculate mouse position relative to the image area (0 to 1)
+            const x = (e.clientX - left) / width;
+            const y = (e.clientY - top) / height;
+
+            // Calculate movement range (pixels)
+            const moveX = (x - 0.5) * 30; // Move max 15px left/right
+            const moveY = (y - 0.5) * 30; // Move max 15px up/down
+
+            // Apply inverse transform for parallax feel
+            heroImage.style.transform = `translate(${-moveX}px, ${-moveY}px) scale(1.1)`;
+        });
+
+        // Reset image position when mouse leaves
+        imageArea.addEventListener('mouseleave', () => {
+            heroImage.style.transform = `translate(0, 0) scale(1.1)`;
+        });
+
+        // --- 2. MAGNETIC BUTTON EFFECT ---
+        const btn = document.getElementById('magneticBtn');
+        
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+
+            // Move button slightly towards mouse (Magnetic pull)
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = `translate(0, 0)`;
+        });
+
+        // --- 3. CLICK ACTION ---
+        btn.addEventListener('click', () => {
+            // Visual feedback
+            btn.innerHTML = "Loading...";
+            btn.style.width = "auto";
+            
+            // Simulate navigation delay
+            setTimeout(() => {
+                alert("Navigating to transformation plans..."); 
+                // In a real app: window.location.href = '/plans';
+                btn.innerHTML = "Go Now <span class='arrow'>→</span>";
+            }, 800);
+        });

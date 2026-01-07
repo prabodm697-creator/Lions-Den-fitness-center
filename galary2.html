@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Transformation & Awards Gallery</title>
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #b0b0b0;
+            --accent-color: #00bdf6; /* Energetic Red */
+            --accent-secondary: #2ed573; /* Success Green */
+            --transition-speed: 0.3s;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* --- HEADER & NAV --- */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(to bottom, #1a1a1a, var(--bg-color));
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h1 span {
+            color: var(--accent-color);
+        }
+
+        .filter-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 2px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all var(--transition-speed);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* --- GALLERY GRID --- */
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            /* Responsive Grid: Auto-fit creates columns based on available space */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* --- GALLERY CARD STYLES --- */
+        .gallery-item {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform var(--transition-speed);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        /* Main Image in Card */
+        .main-image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 75%; /* 4:3 Aspect Ratio */
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .main-image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .main-image-wrapper:hover img {
+            transform: scale(1.05);
+        }
+
+        .item-info {
+            padding: 15px;
+        }
+
+        .item-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        .item-category {
+            font-size: 0.85rem;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .instruction-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Specific style for Awards to indicate no sub-gallery */
+        .award-badge {
+            background: #ffd700;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* --- SUB-GALLERY (HORIZONTAL SCROLL) --- */
+        .sub-gallery-container {
+            max-height: 0; /* Hidden by default */
+            overflow: hidden;
+            background-color: #151515;
+            transition: max-height 0.5s ease-in-out;
+        }
+
+        /* Class to expand the sub-gallery */
+        .gallery-item.expanded .sub-gallery-container {
+            max-height: 150px; /* Adjust based on thumbnail size + padding */
+            border-top: 1px solid #333;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 15px;
+            /* Hide scrollbar for cleaner look, but keep functionality */
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) #333;
+            scroll-snap-type: x mandatory; /* Improves mobile feel */
+        }
+
+        /* Custom Scrollbar for Chrome/Safari */
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: #333;
+        }
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color);
+            border-radius: 10px;
+        }
+
+        .thumb {
+            flex: 0 0 120px; /* Fixed width for thumbnails */
+            height: 90px;
+            border-radius: 8px;
+            cursor: pointer;
+            object-fit: cover;
+            scroll-snap-align: start;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .thumb:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* --- FULL SCREEN LIGHTBOX (ZOOM) --- */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            
+            .gallery-container {
+                grid-template-columns: 1fr; /* Stack vertically on phone */
+                gap: 20px;
+            }
+
+            /* On phone, ensure the horizontal scroll container is touch-friendly */
+            .sub-gallery-container {
+                max-height: 140px; /* Slightly smaller on mobile */
+            }
+            
+            .thumb {
+                flex: 0 0 140px; /* Larger thumbnails on mobile for easier tapping */
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>LION'S DEN  <span>FAMILY </span> Gallery</h1>
+        
+        
+        <!-- Filter Buttons -->
+        <nav class="filter-nav">
+            <button class="filter-btn" onclick="filterGallery('awards')">Awards</button>
+            <button class="filter-btn active" onclick="filterGallery('all')">All</button>
+            <button class="filter-btn" onclick="filterGallery('weight-loss')">Weight Loss</button>
+            <button class="filter-btn" onclick="filterGallery('muscle-gain')">Muscle Gain</button>
+            
+        </nav>
+    </header>
+
+    <main class="gallery-container">
+
+
+
+
+
+
+
+        <!-- CATEGORY: WEIGHT LOSS (Has sub-gallery) -->
+        <!-- Note: data-has-sub="true" enables the expand logic -->
+        <div class="gallery-item category-weight-loss" data-category="weight-loss" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <!-- Main Photo -->
+                <img src="client1.png" alt="Weight Loss Journey 1">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Weight Loss</span>
+                <div class="item-title">Client: name </div>
+                <div class="instruction-text">Click photo to see progress timeline &darr;</div>
+            </div>
+            <!-- Hidden Sub Gallery (Scrolls Left/Right) -->
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="https://picsum.photos/seed/weight1a/300/200" alt="Month 1" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/weight1b/300/200" alt="Month 3" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/weight1c/300/200" alt="Month 6" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/weight1d/300/200" alt="Final" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/weight1e/300/200" alt="Diet Plan" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <!-- CATEGORY: MUSCLE GAIN (Has sub-gallery) -->
+        <div class="gallery-item category-muscle-gain" data-category="muscle-gain" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <img src="client2.png" alt="Muscle Gain 1">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Muscle Gain</span>
+                <div class="item-title">Client: name</div>
+                <div class="instruction-text">Click photo to see workout gallery &darr;</div>
+            </div>
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle1a/300/200" alt="Gym" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle1b/300/200" alt="Posing" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle1c/300/200" alt="Strength" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle1d/300/200" alt="Supplements" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- CATEGORY: AWARDS (NO SUB-GALLERY) -->
+        <!-- Note: data-has-sub="false" (or omitted) means it just zooms. No "photos inside photos". -->
+        <div class="gallery-item category-awards" data-category="awards" data-has-sub="false">
+            <div class="main-image-wrapper" onclick="openZoom(this.querySelector('img').src)">
+                <img src="https://picsum.photos/seed/award1/600/600" alt="Gold Trophy 2023">
+            </div>
+            <div class="item-info">
+                <span class="item-category" style="color: gold;">Achievement</span>
+                <div class="item-title">Best Gym Award 2023 <span class="award-badge">1st Place</span></div>
+                <div class="instruction-text">Click to zoom full screen</div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- CATEGORY: WEIGHT LOSS (Has sub-gallery) -->
+        <div class="gallery-item category-weight-loss" data-category="weight-loss" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <img src="prabod2.jpeg" alt="Weight Loss Journey 2">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Weight Loss</span>
+                <div class="item-title">Client:prabod madusanka</div>
+                <div class="instruction-text">Click photo to see progress timeline &darr;</div>
+            </div>
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="prabod6.jpeg" alt="Start" onclick="openZoom(this.src)">
+                    <img class="thumb" src="prabod2.jpeg" alt="Start" onclick="openZoom(this.src)">
+                    <img class="thumb" src="prabod3.jpeg" alt="Cardio" onclick="openZoom(this.src)">
+                    <img class="thumb" src="prabod4.jpeg" alt="Results" onclick="openZoom(this.src)">
+                     <img class="thumb" src="prabod5.jpeg" alt="Results" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- CATEGORY: MUSCLE GAIN (Has sub-gallery) -->
+        <div class="gallery-item category-muscle-gain" data-category="muscle-gain" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <img src="client5.jpg" alt="Muscle Gain 2">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Muscle Gain</span>
+                <div class="item-title">Client: sadun</div>
+                <div class="instruction-text">Click photo to see workout gallery &darr;</div>
+            </div>
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2a/300/200" alt="Squat" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2b/300/200" alt="Deadlift" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2c/300/200" alt="Progress" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2d/300/200" alt="Competition" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+                <!-- CATEGORY: MUSCLE GAIN (Has sub-gallery) -->
+        <div class="gallery-item category-muscle-gain" data-category="muscle-gain" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <img src="client6.png" alt="Muscle Gain 2">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Muscle Gain</span>
+                <div class="item-title">Client: name</div>
+                <div class="instruction-text">Click photo to see workout gallery &darr;</div>
+            </div>
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2a/300/200" alt="Squat" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2b/300/200" alt="Deadlift" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2c/300/200" alt="Progress" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2d/300/200" alt="Competition" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <!-- CATEGORY: AWARDS (NO SUB-GALLERY) -->
+        <div class="gallery-item category-awards" data-category="awards" data-has-sub="false">
+            <div class="main-image-wrapper" onclick="openZoom(this.querySelector('img').src)">
+                <img src="https://picsum.photos/seed/award2/600/600" alt="Community Champion">
+            </div>
+            <div class="item-info">
+                <span class="item-category" style="color: gold;">Achievement</span>
+                <div class="item-title">Community Choice Award <span class="award-badge">Runner Up</span></div>
+                <div class="instruction-text">Click to zoom full screen</div>
+            </div>
+        </div>
+
+
+
+
+
+
+                <!-- CATEGORY: MUSCLE GAIN (Has sub-gallery) -->
+        <div class="gallery-item category-muscle-gain" data-category="muscle-gain" data-has-sub="true">
+            <div class="main-image-wrapper" onclick="handleMainClick(this)">
+                <img src="client7.png" alt="Muscle Gain 2">
+            </div>
+            <div class="item-info">
+                <span class="item-category">Muscle Gain</span>
+                <div class="item-title">Client: name</div>
+                <div class="instruction-text">Click photo to see workout gallery &darr;</div>
+            </div>
+            <div class="sub-gallery-container">
+                <div class="horizontal-scroll">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2a/300/200" alt="Squat" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2b/300/200" alt="Deadlift" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2c/300/200" alt="Progress" onclick="openZoom(this.src)">
+                    <img class="thumb" src="https://picsum.photos/seed/muscle2d/300/200" alt="Competition" onclick="openZoom(this.src)">
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+    </main>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox" class="lightbox" onclick="closeZoom(event)">
+        <span class="close-btn">&times;</span>
+        <img id="lightbox-img" src="" alt="Full Screen">
+    </div>
+
+    <script>
+        // --- 1. FILTER FUNCTION ---
+        function filterGallery(category) {
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+
+            // Update Active Button Styling
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(category) || 
+                   (category === 'all' && btn.textContent === 'All')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Show/Hide Items
+            items.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // --- 2. MAIN IMAGE CLICK HANDLER (TOGGLE SUB-GALLERY) ---
+        function handleMainClick(wrapperElement) {
+            // Find the parent gallery item
+            const item = wrapperElement.closest('.gallery-item');
+            const hasSub = item.dataset.hasSub === 'true';
+
+            if (hasSub) {
+                // Logic for Weight Loss / Muscle Gain
+                // Toggle the 'expanded' class
+                item.classList.toggle('expanded');
+                
+                // Optional: If we want to prevent zooming when opening the sub-gallery, 
+                // we stop the propagation here. But the user asked for:
+                // "When you click one on a photo in the gallery try to show more photos... Click on that photo zoom to full screen"
+                
+                // UX Decision: First click expands. If already expanded, we do NOT zoom the main photo immediately 
+                // to avoid conflict, or we let it zoom. 
+                // Let's implement: Click = Toggle Expand. (Zoom happens on thumbnails or specific double click intent).
+                // To Zoom the main photo specifically, maybe add a small icon button, or just let thumbnails handle zoom.
+                // *However*, usually users expect click to act.
+                
+                // Refined Logic: If expanded, clicking main image again closes it. 
+                // If user wants to Zoom the main image, they can click the thumbnails. 
+                // (This keeps the UI clean).
+                
+            } else {
+                // Logic for Awards (No sub-gallery)
+                // The click event on the div wrapper calls this function, but for awards,
+                // we actually want to trigger the zoom directly. 
+                // We handle this in the HTML onclick="openZoom..." for awards specifically to override.
+            }
+        }
+
+        // --- 3. ZOOM / LIGHTBOX FUNCTIONS ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        function openZoom(imageSrc) {
+            // In a real app, you might switch to a higher-res version here
+            lightboxImg.src = imageSrc;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeZoom(event) {
+            // Close if clicked on background or the close button
+            if (event.target !== lightboxImg) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+        }
+
+        // --- 4. KEYBOARD SUPPORT (Close on Escape) ---
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>

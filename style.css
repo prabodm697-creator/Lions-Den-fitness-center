@@ -1182,3 +1182,467 @@
 
         .website-content h1 { font-family: var(--font-primary); font-size: 4rem; }
         .website-content p { font-family: sans-serif; color: #666; margin-top: 10px;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --accent: #00cec9; /* Teal/Cyan for energy */
+            --text-white: #ffffff;
+            --text-gray: #b2bec3;
+            --transition: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text-white);
+            overflow-x: hidden; /* Prevent horizontal scroll during animations */
+        }
+
+        
+        /* --- SECTION LAYOUT --- */
+        .trainer-spotlight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh; /* Takes up most of the screen */
+            padding: 4rem 5%;
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Decorative background shape */
+        .bg-shape {
+            position: absolute;
+            right: -10%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 206, 201, 0.1) 0%, rgba(18,18,18,0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- LEFT COLUMN: CONTENT --- */
+        .content-col {
+            flex: 1;
+            padding-right: 4rem;
+            z-index: 1;
+            opacity: 0; /* Initial state for animation */
+            transform: translateX(-50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        .role-label {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .trainer-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .trainer-desc {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+        }
+
+        /* --- STATS & SKILLS --- */
+        .stats-container {
+            margin-bottom: 3rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0; /* Animated via JS */
+            transition: width 1.5s ease-in-out;
+        }
+
+        .experience-box {
+            display: inline-flex;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        .years-count {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-right: 10px;
+        }
+
+        /* --- BUTTON --- */
+        .cta-btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background-color: var(--accent);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border: 2px solid var(--accent);
+        }
+
+        .cta-btn:hover {
+            background-color: transparent;
+            color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 206, 201, 0.2);
+        }
+
+        /* --- RIGHT COLUMN: IMAGE --- */
+        .image-col {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 1s ease-out 0.3s, transform 1s ease-out 0.3s; /* Slight delay */
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .trainer-img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px; /* Modern rounded corners */
+            filter: grayscale(100%);
+            transition: filter 0.5s ease, transform 0.5s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 2;
+        }
+
+        .trainer-img:hover {
+            filter: grayscale(0%);
+            transform: scale(1.02);
+        }
+
+        /* Decorative shape behind image */
+        .image-accent {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            z-index: 1;
+            transition: transform 0.5s ease;
+        }
+
+        .image-wrapper:hover .image-accent {
+            transform: translate(10px, -10px);
+        }
+
+        /* --- ANIMATION TRIGGER CLASSES --- */
+        .visible-left {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .visible-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 968px) {
+            .trainer-spotlight {
+                flex-direction: column-reverse; /* Image on top on mobile, or reverse */
+                text-align: center;
+                padding-top: 2rem;
+            }
+
+            .content-col {
+                padding-right: 0;
+                margin-top: 3rem;
+                transform: translateY(30px); /* Change animation direction for mobile */
+            }
+
+            .trainer-name {
+                font-size: 2.5rem;
+            }
+
+            .experience-box {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .image-col {
+                transform: translateY(30px); /* Change animation direction for mobile */
+            }
+            
+            /* Adjust mobile visible class override */
+            .visible-left, .visible-right {
+                transform: translateY(0);
+            }
+        }
+
+
+
+
+
+
+
+
+       
+ /* --- VARIABLES --- */
+        :root {
+            --bg-color: #111111;
+            --text-color: #ffffff;
+            --accent-color: #00f2fe; /* Cyan */
+            --btn-bg: #4facfe;       /* Blue */
+            --btn-hover: #00f2fe;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            
+          
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- SECTION CONTAINER --- */
+        .goto-section {
+            display: flex;
+            
+            max-width: 100%;
+            height: 90vh;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* --- LEFT: TEXT AREA --- */
+        .content-area {
+            flex: 1;
+            padding: 4rem 5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .section-label {
+            font-family: 'Teko', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s forwards 0.2s;
+        }
+
+        h2 {
+            font-size: 4rem;
+            line-height: 0.9;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s forwards 0.4s;
+        }
+
+        h2 span { color: var(--accent-color); }
+
+        p {
+            color: #888;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 500px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s forwards 0.6s;
+        }
+
+        /* --- MAGNETIC BUTTON --- */
+        .goto-btn-container {
+            display: inline-block;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards 0.8s;
+        }
+
+        .goto-btn {
+            position: relative;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--text-color);
+            padding: 1.2rem 3rem;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: color 0.4s;
+        }
+
+        /* Button Fill Effect */
+        .goto-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--text-color);
+            transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: -1;
+        }
+
+        .goto-btn:hover {
+            color: var(--bg-color);
+        }
+
+        .goto-btn:hover::before {
+            width: 100%;
+        }
+
+        .arrow {
+            display: inline-block;
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+
+        .goto-btn:hover .arrow {
+            transform: translateX(10px);
+        }
+
+        /* --- RIGHT: IMAGE AREA --- */
+        .image-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: none; /* Hide default cursor over image */
+        }
+
+        .hero-image {
+            width: 110%; /* Slightly larger for parallax movement */
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            transition: transform 0.1s linear; /* Smooth JS parallax */
+            
+            transform-origin: center;
+            /* Initial Clip Path for reveal animation */
+            clip-path: inset(0 100% 0 0);
+            animation: revealImage 1s cubic-bezier(0.77, 0, 0.175, 1) forwards 0.5s;
+        }
+
+        /* Overlay for better text contrast on image if needed, 
+           though split screen handles this. Used here for hover effect. */
+        .image-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 242, 254, 0.1);
+            mix-blend-mode: overlay;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .image-area:hover .image-overlay { opacity: 1; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes revealImage {
+            to { clip-path: inset(0 0 0 0); }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .goto-section {
+                flex-direction: column-reverse;
+                height: auto;
+            }
+            .content-area { padding: 3rem; text-align: center; align-items: center; }
+            .image-area { height: 40vh; width: 100%; }
+            h2 { font-size: 2.5rem; }
+        }
