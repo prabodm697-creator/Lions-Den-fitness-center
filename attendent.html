@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Management System</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --sidebar-bg: #1e1e1e;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --primary: #2a94d6c3;
+            --secondary: #03dac6;
+            --danger: #cf6679;
+            --warning: #ffb74d;
+            --success: #81c784;
+            --border: #333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --glass-bg: rgba(30, 30, 30, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        .light-mode {
+            --bg-color: #f5f5f5;
+            --sidebar-bg: #ffffff;
+            --card-bg: #dcdada;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --primary: #069cf3d3;
+            --secondary: #018786;
+            --border: #e0e0e0;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- ISLAND NOTIFICATION --- */
+        .island-toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 12px 28px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 220px;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .island-toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .island-icon {
+            display: flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px;
+            background: var(--success); border-radius: 50%; color: #000;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            padding: 20px; overflow-y: auto;
+        }
+        .brand { font-size: 1.4rem; font-weight: bold; margin-bottom: 30px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .nav-btn {
+            background: none; border: none; color: var(--text-color); text-align: left;
+            padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 5px;
+            font-size:1rem; display: flex; align-items: center; gap: 10px;
+            transition: 0.2s; width: 100%;
+        }
+        .nav-btn:hover, .nav-btn.active { background-color: rgba(3, 218, 198, 0.1); color: var(--secondary); }
+        .nav-btn.locked { opacity: 0.5; cursor: not-allowed; position: relative; }
+        .nav-btn.locked::after { content: "🔒"; position: absolute; right: 15px; font-size: 0.8rem; }
+        .nav-section-title { font-size: 0.75rem; color: var(--text-muted); margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        header {
+            padding: 15px 30px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .admin-badge { display: none; background: var(--primary); color: #000; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .admin-badge.visible { display: block; }
+
+        .view-container { flex: 1; overflow-y: auto; padding: 30px; display: none; }
+        .view-container.active { display: block; }
+
+        /* --- FULL SCREEN ATTENDANCE --- */
+        .attendance-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-color); z-index: 5000; display: none;
+            flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+        }
+        .attendance-overlay.active { display: flex; }
+        .kiosk-input-group {
+            display: flex; width: 100%; max-width: 800px; margin-bottom: 40px;
+            box-shadow: var(--shadow); border-radius: 50px; overflow: hidden;
+        }
+        .kiosk-search {
+            flex:1; background: var(--card-bg); border: none; border-right: 1px solid var(--border);
+            color: var(--text-color); font-size: 3rem; text-align: left; outline: none; padding: 20px 30px;
+        }
+        .kiosk-btn {
+            width: 200px; background-color: var(--primary); color: #000; border: none;
+            font-size:1.5rem; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .attendance-result-card {
+            width: 100%; max-width: 600px; background: var(--card-bg); padding: 40px;
+            border-radius: 20px; border: 1px solid var(--border); display: none; box-shadow: var(--shadow);
+        }
+        .attendance-result-card.active { display: block; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .stat-box-large { background: var(--bg-color); padding: 20px; border-radius: 10px; text-align: center; margin: 10px 0; }
+        .stat-label-lg { font-size:1rem; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .stat-value-lg { font-size: 2.5rem; font-weight: bold; color: var(--secondary); }
+
+        /* --- DASHBOARD & GRIDS --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background-color: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .stat-value { font-size: 2rem; font-weight: bold; margin-top: 10px; color: var(--text-color); }
+        .stat-label { font-size: 0.9rem; color: var(--text-muted); }
+
+        .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .member-card {
+            background-color: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border);
+            box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; gap: 8px;
+        }
+        .member-header { display: flex; justify-content: space-between; align-items: start; }
+        .member-name { font-weight: bold; font-size: 1.1rem; }
+        .member-id { color: var(--text-muted); font-size: 0.85rem; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .status-paid { background-color: rgba(129, 199, 132, 0.2); color: var(--success); }
+        .status-overdue { background-color: rgba(255, 183, 77, 0.2); color: var(--warning); }
+        .status-unpaid { background-color: rgba(207, 102, 121, 0.2); color: var(--danger); }
+        
+        .detail-row { display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 5px; }
+        .detail-row:last-child { border-bottom: none; }
+        .unpaid-months { color: var(--danger); font-weight: bold; }
+        
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; padding-top: 10px; }
+        .card-actions .btn { font-size: 0.85rem; justify-content: center; }
+
+        /* --- HISTORY TABLE --- */
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .history-table th { text-align: left; padding: 10px; border-bottom: 2px solid var(--border); color: var(--text-muted); }
+        .history-table td { padding: 10px; border-bottom: 1px solid var(--border); }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center; z-index: 6000;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal { background-color: var(--card-bg); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
+        .modal h2 { margin-bottom: 20px; color: var(--secondary); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-color); border-radius: 6px; }
+        .form-group input[type="checkbox"] { width: auto; margin-right: 10px; transform: scale(1.2); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+        /* --- BUTTONS --- */
+        .btn { padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; font-size: 1rem; }
+        .btn-primary { background-color: var(--primary); color: #000; }
+        .btn-secondary { background-color: var(--secondary); color: #000; }
+        .btn-danger { background-color: var(--danger); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-color); }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-block { width: 100%; justify-content: center; padding: 20px; font-size: 1.5rem; font-weight: bold; }
+
+        .hidden { display: none !important; }
+        .whatsapp-btn { background-color: #25D366; color: white; }
+        .alert-box { padding: 15px; margin-bottom: 15px; border-radius: 8px; background: rgba(207, 102, 121, 0.1); border: 1px solid var(--danger); display: flex; justify-content: space-between; align-items: center; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ISLAND NOTIFICATION -->
+    <div id="islandToast" class="island-toast">
+        <div class="island-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <span id="islandMsg">Success</span>
+    </div>
+
+    <!-- FULL SCREEN ATTENDANCE OVERLAY -->
+    <div id="attendanceOverlay" class="attendance-overlay active">
+        <div style="position: absolute; top: 20px; right: 20px;">
+            <button class="btn btn-outline" onclick="toggleFullScreen(false)">❌ Exit / Admin</button>
+        </div>
+        <div style="text-align: center; width: 100%; max-width: 800px;">
+            <img src="p13.png" width="200px" height="200px">
+            <div style="color: var(--text-muted); margin-bottom: 30px; font-size: 1.2rem; letter-spacing: 2px;">ATTENDANCE SYSTEM</div>
+            <div class="kiosk-input-group">
+                <input type="text" id="kioskSearch" class="kiosk-search" placeholder="SEARCH ID..." autocomplete="off" onkeyup="handleKioskSearch(event)">
+                <button class="kiosk-btn" onclick="handleKioskSearch(null)">SEARCH</button>
+            </div>
+            <div id="kioskResult" class="attendance-result-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 20px;">
+                    <div>
+                        <h1 id="kioskName" style="color: var(--secondary); font-size: 2.5rem; margin:0;">NAME</h1>
+                        <div id="kioskId" style="color: var(--text-muted); font-size: 1.5rem;">ID: 000</div>
+                    </div>
+                    <div id="kioskStatus" style="font-size: 1.5rem; font-weight: bold;">STATUS</div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="stat-box-large">
+                        <span class="stat-label-lg">MONTHLY VISITS</span>
+                        <span class="stat-value-lg" id="kioskVisits">0</span>
+                    </div>
+                    <div class="stat-box-large">
+                        <span class="stat-label-lg">NEXT PAYMENT</span>
+                        <span class="stat-value-lg" id="kioskNextPay" style="font-size: 1.5rem; margin-top: 15px;">DATE</span>
+                    </div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <button id="btnKioskMark" class="btn btn-primary btn-block">✅ MARK ATTENDANCE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div style="display: flex; width: 100%; height: 100%;">
+        <nav class="sidebar">
+            <div class="brand">
+                <img src="p13.png" width="60px" height="60px">
+                LDF OS
+            </div>
+            <div class="nav-section-title">Attendant</div>
+            <button class="nav-btn active" onclick="toggleFullScreen(true)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                Full Screen Mode
+            </button>
+            <div class="nav-section-title">Management (Locked)</div>
+            <button class="nav-btn locked" onclick="checkAdmin('dashboard')">Dashboard</button>
+            <button class="nav-btn locked" onclick="checkAdmin('members')">All Members</button>
+            <button class="nav-btn locked" onclick="checkAdmin('unpaid')">Unpaid List</button>
+            <button class="nav-btn locked" onclick="checkAdmin('finance')">Financials</button>
+            <button class="nav-btn locked" onclick="checkAdmin('addMember')">Add Member</button>
+            
+            <div class="nav-section-title">System</div>
+            <button class="nav-btn" onclick="downloadBackup()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Backup
+            </button>
+            <button class="nav-btn" onclick="document.getElementById('restoreFile').click()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Restore Backup
+            </button>
+            <input type="file" id="restoreFile" hidden accept=".json" onchange="restoreBackup(this)">
+
+            <div style="margin-top: auto;">
+                 <button class="nav-btn btn-outline" onclick="toggleTheme()" style="justify-content: center;">Toggle Theme</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header>
+                <h2 id="pageTitle">Admin Panel</h2>
+                <div class="header-controls">
+                    <span class="admin-badge" id="adminBadge">Admin</span>
+                    <button id="logoutBtn" class="btn btn-danger hidden" onclick="logoutAdmin()">Logout</button>
+                </div>
+            </header>
+
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard" class="view-container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Members</div>
+                        <div class="stat-value" id="statTotalMembers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Today</div>
+                        <div class="stat-value" id="statActiveToday">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Expiring Soon</div>
+                        <div class="stat-value" style="color: var(--warning)" id="statExpiring">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Unpaid Revenue</div>
+                        <div class="stat-value" style="color: var(--danger)" id="statUnpaidRev">0 LKR</div>
+                    </div>
+                </div>
+                <h3>Alerts</h3>
+                <div id="alertContainer" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- MEMBERS VIEW -->
+            <div id="members" class="view-container">
+                <div class="form-group" style="max-width: 300px;">
+                    <input type="text" id="memberListSearch" placeholder="Filter list..." onkeyup="renderMembersList()">
+                </div>
+                <div class="members-grid" id="membersGrid"></div>
+            </div>
+
+            <!-- UNPAID VIEW -->
+            <div id="unpaid" class="view-container">
+                <div class="members-grid" id="unpaidGrid"></div>
+            </div>
+
+            <!-- FINANCE VIEW -->
+            <div id="finance" class="view-container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Total (LKR)</div>
+                        <div class="stat-value" id="financeMonthlyTotal" style="color: var(--success)">0.00</div>
+                        <div style="margin-top:15px;">
+                            <button class="btn btn-danger" style="font-size:0.8rem;" onclick="resetFinance('monthly')">Reset Monthly</button>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Admission Fees (LKR)</div>
+                        <div class="stat-value" id="financeAdmissionTotal" style="color: var(--primary)">0.00</div>
+                        <div style="margin-top:15px;">
+                            <button class="btn btn-danger" style="font-size:0.8rem;" onclick="resetFinance('admission')">Reset Admission</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <button class="btn btn-primary" onclick="exportToCSV()">Download CSV Report</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal" style="text-align: center;">
+            <h2 style="color: var(--primary)">Admin Access</h2>
+            <div class="form-group">
+                <input type="password" id="adminPassword" placeholder="Password" style="text-align: center; font-size: 1.2rem;">
+            </div>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" class="btn btn-outline" onclick="closeLoginModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="attemptLogin()">Unlock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MEMBER MODAL -->
+    <div class="modal-overlay" id="addMemberModal">
+        <div class="modal">
+            <h2>Add New Member</h2>
+            <form id="addMemberForm" onsubmit="addMember(event)">
+                <div class="form-group">
+                    <label>Member ID</label>
+                    <input type="text" id="newId" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="newName" required>
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="newDob" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number (94 format)</label>
+                    <input type="number" id="newPhone" placeholder="7xxxxxxx" required>
+                </div>
+                <div class="form-group">
+                    <label>Membership Price (Monthly LKR)</label>
+                    <input type="number" id="newPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Admission Fee (One-time)</label>
+                    <input type="number" id="newAdmissionFee" >
+                </div>
+                <div class="form-group">
+                    <label>Join Date (Fixed Billing Cycle)</label>
+                    <input type="date" id="newJoinDate" required>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: var(--bg-color); padding: 10px; border-radius: 6px;">
+                    <input type="checkbox" id="markPresentNow" style="width: 20px; height: 20px;">
+                    <label for="markPresentNow" style="margin: 0; cursor: pointer;">Mark attendance today</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addMemberModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HISTORY MODAL -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <h2>Payment History</h2>
+            <div id="historyList" style="max-height: 300px; overflow-y: auto;">
+                <!-- Table injected here -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('historyModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        const APP_KEY = 'gymManagerData_v9';
+        let members = [];
+        let finance = { monthlyTotal: 0, admissionTotal: 0 };
+        let isAdmin = false;
+        let pendingAction = null;
+        let currentKioskMember = null;
+        let toastTimeout = null;
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            document.getElementById('newJoinDate').valueAsDate = new Date();
+            document.getElementById('kioskSearch').focus();
+        });
+
+        function loadData() {
+            const stored = localStorage.getItem(APP_KEY);
+            if (stored) {
+                const data = JSON.parse(stored);
+                members = data.members || [];
+                finance = data.finance || { monthlyTotal: 0, admissionTotal: 0 };
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(APP_KEY, JSON.stringify({ members, finance }));
+        }
+
+        // --- Backup & Restore ---
+        function downloadBackup() {
+            const data = { members, finance };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            const dateStr = new Date().toISOString().split('T')[0];
+            downloadAnchorNode.setAttribute("download", `gym_backup_${dateStr}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Backup Downloaded");
+        }
+
+        function restoreBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.members && data.finance) {
+                        members = data.members;
+                        finance = data.finance;
+                        saveData();
+                        showToast("Data Restored Successfully");
+                        // Refresh UI after a short delay
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast("Invalid Backup File");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error Reading File");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Helpers ---
+        function getAge(dob) { return new Date().getFullYear() - new Date(dob).getFullYear(); }
+        function formatDate(d) { return new Date(d).toLocaleDateString(); }
+        function getDaysDiff(d1, d2) { return Math.round((new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24)); }
+
+        // --- ISLAND TOAST LOGIC ---
+        function showToast(msg) {
+            const toast = document.getElementById('islandToast');
+            const msgSpan = document.getElementById('islandMsg');
+            msgSpan.textContent = msg;
+            if(toastTimeout) clearTimeout(toastTimeout);
+            toast.classList.add('active');
+            toastTimeout = setTimeout(() => { toast.classList.remove('active'); }, 3000);
+        }
+
+        // --- FIXED CYCLE LOGIC ---
+        function getFixedCycleDueDate(joinDateStr) {
+            const joinDate = new Date(joinDateStr);
+            const today = new Date();
+            const dayOfMonth = joinDate.getDate();
+            let nextDue = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
+            if (nextDue <= today) {
+                nextDue.setMonth(nextDue.getMonth() + 1);
+            }
+            return nextDue.toISOString().split('T')[0];
+        }
+
+        function getStatusAndUnpaid(member) {
+            const joinDate = new Date(member.joinDate);
+            const fixedDay = joinDate.getDate();
+            const today = new Date();
+            
+            let thisMonthDue = new Date(today.getFullYear(), today.getMonth(), fixedDay);
+            if (today.getDate() < fixedDay) {
+                thisMonthDue.setMonth(thisMonthDue.getMonth() - 1);
+            }
+            
+            const nextDueStr = getFixedCycleDueDate(member.joinDate);
+            const nextDue = new Date(nextDueStr);
+            const daysToDue = getDaysDiff(today, nextDue);
+
+            const previousDue = new Date(nextDue);
+            previousDue.setMonth(previousDue.getMonth() - 1);
+            
+            const isLate = today > previousDue;
+            let status = 'Paid';
+            let unpaidMonths = 0;
+
+            if (isLate) {
+                const lastPay = new Date(member.lastPaymentDate);
+                if (lastPay < previousDue) {
+                    status = 'Unpaid';
+                    const diffMonths = (today.getFullYear() - lastPay.getFullYear()) * 12 + (today.getMonth() - lastPay.getMonth());
+                    unpaidMonths = diffMonths <= 0 ?1 : diffMonths; 
+                }
+            }
+            
+            if (daysToDue <= 5 && daysToDue >= 0 && status !== 'Unpaid') status = 'Overdue';
+            
+            return { status, unpaidMonths, nextDueStr };
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+
+        // --- Full Screen Logic ---
+        function toggleFullScreen(show) {
+            const overlay = document.getElementById('attendanceOverlay');
+            const searchInput = document.getElementById('kioskSearch');
+            if (show) {
+                overlay.classList.add('active');
+                searchInput.value = '';
+                document.getElementById('kioskResult').classList.remove('active');
+                setTimeout(() => searchInput.focus(), 100);
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
+
+        function handleKioskSearch(e) {
+            if (e && e.key && e.key !== 'Enter') { return; }
+            const query = document.getElementById('kioskSearch').value.trim();
+            const resultCard = document.getElementById('kioskResult');
+            const btnMark = document.getElementById('btnKioskMark');
+            if (query.length < 1) { resultCard.classList.remove('active'); return; }
+
+            const member = members.find(m => 
+                m.name.toLowerCase().includes(query.toLowerCase()) || m.id.toString().includes(query)
+            );
+
+            if (member) {
+                currentKioskMember = member;
+                const { status, nextDueStr } = getStatusAndUnpaid(member);
+                const isActive = status === 'Paid';
+                const todayStr = new Date().toISOString().split('T')[0];
+                const isPresent = member.attendanceLog && member.attendanceLog.includes(todayStr);
+                
+                const currentMonth = new Date().getMonth();
+                const monthlyVisits = member.attendanceLog ? 
+                    member.attendanceLog.filter(d => new Date(d).getMonth() === currentMonth).length : 0;
+
+                document.getElementById('kioskName').textContent = member.name;
+                document.getElementById('kioskId').textContent = `ID: ${member.id}`;
+                document.getElementById('kioskVisits').textContent = monthlyVisits;
+                document.getElementById('kioskNextPay').textContent = formatDate(nextDueStr);
+                
+                const statusEl = document.getElementById('kioskStatus');
+                statusEl.textContent = isActive ? '✅ ACTIVE' : '❌ INACTIVE';
+                statusEl.style.color = isActive ? 'var(--success)' : 'var(--danger)';
+
+                if (isPresent) {
+                    btnMark.textContent = 'ALREADY PRESENT'; btnMark.disabled = true; btnMark.style.opacity = '0.5';
+                } else {
+                    btnMark.textContent = '✅ MARK ATTENDANCE'; btnMark.disabled = false; btnMark.style.opacity = '1';
+                    btnMark.onclick = () => kioskMarkAttendance(member.id);
+                }
+                resultCard.classList.add('active');
+            } else {
+                resultCard.classList.remove('active');
+                showToast("Member Not Found");
+            }
+        }
+
+        function kioskMarkAttendance(id) {
+            const m = members.find(m => m.id === id);
+            if (m) {
+                const today = new Date().toISOString().split('T')[0];
+                if (!m.attendanceLog) m.attendanceLog = [];
+                m.attendanceLog.push(today);
+                saveData();
+                showToast(`Welcome, ${m.name}`);
+                document.getElementById('kioskSearch').value = '';
+                document.getElementById('kioskResult').classList.remove('active');
+                document.getElementById('kioskSearch').focus();
+            }
+        }
+
+        // --- Admin Auth ---
+        function checkAdmin(targetAction) {
+            if (isAdmin) {
+                if(targetAction === 'addMember') openModal('addMemberModal');
+                else switchView(targetAction);
+            } else {
+                pendingAction = targetAction;
+                document.getElementById('loginModal').classList.add('open');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+
+
+
+
+        
+
+        function attemptLogin() {
+            const pass = document.getElementById('adminPassword').value;
+            //password
+            if (pass === "") {
+                isAdmin = true;
+                document.getElementById('adminBadge').classList.add('visible');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                document.querySelectorAll('.nav-btn.locked').forEach(btn => { btn.classList.remove('locked'); btn.style.cursor = 'pointer'; });
+                closeLoginModal();
+                if (pendingAction === 'addMember') openModal('addMemberModal');
+                else if (pendingAction) switchView(pendingAction);
+                pendingAction = null;
+                showToast("Admin Logged In");
+            } else {
+                alert("Invalid Password");
+            }
+        }
+
+        function closeLoginModal() { document.getElementById('loginModal').classList.remove('open'); }
+        function logoutAdmin() {
+            if(confirm("Logout Admin?")) {
+                isAdmin = false;
+                document.getElementById('adminBadge').classList.remove('visible');
+                document.getElementById('logoutBtn').classList.add('hidden');
+                switchView('dashboard'); 
+                document.querySelectorAll('.nav-btn.locked').forEach(btn => { btn.style.cursor = 'not-allowed'; });
+                showToast("Logged Out");
+            }
+        }
+
+        // --- Admin Views ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => { if(btn.onclick.toString().includes(viewId)) btn.classList.add('active'); });
+            document.getElementById('attendanceOverlay').classList.remove('active');
+            document.getElementById(viewId).classList.add('active');
+            const titles = { 'dashboard': 'Dashboard', 'members': 'All Members', 'unpaid': 'Unpaid', 'finance': 'Financials' };
+            document.getElementById('pageTitle').textContent = titles[viewId];
+            if (viewId === 'dashboard') renderDashboard();
+            if (viewId === 'members') renderMembersList();
+            if (viewId === 'unpaid') renderUnpaid();
+            if (viewId === 'finance') renderFinance(); 
+        }
+
+        function renderDashboard() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeToday = members.filter(m => m.attendanceLog && m.attendanceLog.includes(todayStr)).length;
+            const expiring = members.filter(m => getStatusAndUnpaid(m).status === 'Overdue').length;
+            
+            let unpaidRev = 0;
+            members.forEach(m => {
+                const res = getStatusAndUnpaid(m);
+                if(res.status === 'Unpaid') {
+                    unpaidRev += (m.price * (res.unpaidMonths ||1));
+                }
+            });
+
+            document.getElementById('statTotalMembers').textContent = members.length;
+            document.getElementById('statActiveToday').textContent = activeToday;
+            document.getElementById('statExpiring').textContent = expiring;
+            document.getElementById('statUnpaidRev').textContent = unpaidRev + ' LKR';
+            
+            // Alerts
+            const alerts = document.getElementById('alertContainer');
+            alerts.innerHTML = '';
+            const absent = members.filter(m => checkConsecutiveAbsence(m) >= 5);
+            absent.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'alert-box';
+                div.innerHTML = `<span>${m.name} absent 5+ days</span> <a href="https://wa.me/94${m.phone}" target="_blank" class="btn whatsapp-btn">WA</a>`;
+                alerts.appendChild(div);
+            });
+        }
+
+        function checkConsecutiveAbsence(m) {
+            if(!m.attendanceLog || m.attendanceLog.length === 0) return 0;
+            const today = new Date();
+            const lastVisit = new Date(m.attendanceLog.sort().reverse()[0]);
+            if(lastVisit.toDateString() === today.toDateString()) return 0;
+            let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1);
+            let daysAbsent = 0;
+            for(let i=0; i<10; i++) {
+                if(m.attendanceLog.includes(checkDate.toISOString().split('T')[0])) break;
+                daysAbsent++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            return daysAbsent;
+        }
+
+        function renderFinance() {
+             document.getElementById('financeMonthlyTotal').textContent = finance.monthlyTotal.toLocaleString();
+             document.getElementById('financeAdmissionTotal').textContent = finance.admissionTotal.toLocaleString();
+        }
+
+        function renderMembersList() {
+            const grid = document.getElementById('membersGrid');
+            grid.innerHTML = '';
+            const search = document.getElementById('memberListSearch').value.toLowerCase();
+            const list = members.filter(m => m.name.toLowerCase().includes(search) || m.id.toString().includes(search));
+            list.forEach(m => {
+                const { status, unpaidMonths, nextDueStr } = getStatusAndUnpaid(m);
+                const statusClass = status === 'Paid' ? 'status-paid' : (status === 'Overdue' ? 'status-overdue' : 'status-unpaid');
+                
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                card.innerHTML = `
+                    <div class="member-header">
+                        <div><div class="member-name">${m.name}</div><div class="member-id">ID: ${m.id}</div></div>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                    </div>
+                    <div class="detail-row"><span>Age:</span> <span>${getAge(m.dob)}</span></div>
+                    <div class="detail-row"><span>Phone:</span> <span>0${m.phone}</span></div>
+                    <div class="detail-row"><span>Next Pay:</span> <span>${formatDate(nextDueStr)}</span></div>
+                    ${unpaidMonths > 0 ? `<div class="detail-row"><span>Unpaid:</span> <span class="unpaid-months">${unpaidMonths} Month(s)</span></div>` : ''}
+                    
+                    <div class="card-actions">
+                        ${status !== 'Paid' ? 
+                            `<a href="https://wa.me/94${m.phone}" target="_blank" class="btn whatsapp-btn">Remind</a> <button class="btn btn-secondary" onclick="markPaid('${m.id}')">Pay</button>` 
+                            : `<button class="btn btn-secondary" disabled>Paid</button>`}
+                        <button class="btn btn-outline" onclick="showHistory('${m.id}')">History</button>
+                        <button class="btn btn-danger" onclick="deleteMember('${m.id}')">Del</button>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderUnpaid() {
+            const grid = document.getElementById('unpaidGrid');
+            grid.innerHTML = '';
+            const list = members.filter(m => getStatusAndUnpaid(m).status === 'Unpaid');
+            list.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'member-card';
+                const { unpaidMonths } = getStatusAndUnpaid(m);
+                card.innerHTML = `
+                    <h3>${m.name} (${m.id})</h3> 
+                    <div class="detail-row"><span>Arrears:</span> <span class="unpaid-months">${unpaidMonths} Months</span></div>
+                    <button class="btn btn-secondary" onclick="markPaid('${m.id}')">Receive Payment</button>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function addMember(e) {
+            e.preventDefault();
+            const phone = document.getElementById('newPhone').value;
+            const admissionFee = parseFloat(document.getElementById('newAdmissionFee').value) || 0;
+            const markPresent = document.getElementById('markPresentNow').checked;
+            const joinDate = document.getElementById('newJoinDate').value;
+            const price = parseFloat(document.getElementById('newPrice').value);
+
+            const newMember = {
+                id: document.getElementById('newId').value,
+                name: document.getElementById('newName').value,
+                dob: document.getElementById('newDob').value,
+                phone: phone,
+                price: price,
+                joinDate: joinDate,
+                lastPaymentDate: joinDate,
+                admissionFeePaid: admissionFee,
+                attendanceLog: markPresent ? [new Date().toISOString().split('T')[0]] : [],
+                isActive: true,
+                paymentLog: [
+                    { date: joinDate, amount: price + admissionFee, note: admissionFee > 0 ? "Join + Admission" : "Join" }
+                ]
+            };
+            if (members.some(m => m.id === newMember.id)) { alert('ID Exists'); return; }
+            members.push(newMember);
+            finance.monthlyTotal += price;
+            finance.admissionTotal += admissionFee;
+            saveData();
+            closeModal('addMemberModal');
+            renderDashboard();
+            showToast("Member Added");
+            e.target.reset();
+            document.getElementById('newJoinDate').valueAsDate = new Date();
+        }
+
+        function deleteMember(id) {
+            if(confirm('Delete?')) { 
+                members = members.filter(m => m.id !== id); 
+                saveData(); 
+                renderDashboard(); 
+                renderMembersList(); 
+                showToast("Member Deleted");
+            }
+        }
+
+        function markPaid(id) {
+            const m = members.find(m => m.id === id);
+            if(m) {
+                const today = new Date().toISOString().split('T')[0];
+                m.lastPaymentDate = today;
+                finance.monthlyTotal += m.price;
+
+                // --- LOG PAYMENT TO HISTORY ---
+                if (!m.paymentLog) m.paymentLog = [];
+                m.paymentLog.push({ date: today, amount: m.price, note: "Monthly Fee" });
+                m.paymentLog.sort((a,b) => new Date(b.date) - new Date(a.date)); 
+
+                saveData();
+                const current = document.getElementById('pageTitle').textContent;
+                if(current.includes('Dashboard')) renderDashboard();
+                else if(current.includes('Members')) renderMembersList();
+                else if(current.includes('Unpaid')) renderUnpaid();
+                
+                showToast("Payment Recorded");
+                const nextDue = formatDate(getFixedCycleDueDate(m.joinDate));
+                if(confirm('Send WA Confirmation?')) { window.open(`https://wa.me/94${m.phone}?text=Payment received. Next due: ${nextDue}`, '_blank'); }
+            }
+        }
+
+        function showHistory(id) {
+            const m = members.find(m => m.id === id);
+            const listDiv = document.getElementById('historyList');
+            
+            if (!m.paymentLog || m.paymentLog.length === 0) {
+                listDiv.innerHTML = "<p>No payment history found.</p>";
+            } else {
+                let html = `<table class="history-table"><thead><tr><th>Date</th><th>Amount (LKR)</th><th>Note</th></tr></thead><tbody>`;
+                m.paymentLog.forEach(p => {
+                    html += `<tr><td>${formatDate(p.date)}</td><td>${p.amount.toLocaleString()}</td><td>${p.note || ''}</td></tr>`;
+                });
+                html += `</tbody></table>`;
+                listDiv.innerHTML = html;
+            }
+            openModal('historyModal');
+        }
+
+        function resetFinance(type) {
+            if(confirm(`Reset ${type} revenue to 0? This cannot be undone.`)) { 
+                finance[type+'Total'] = 0; 
+                saveData(); 
+                renderFinance(); 
+                showToast("Financials Reset");
+            }
+        }
+
+        function exportToCSV() { 
+            let csv = "data:text/csv;charset=utf-8,ID,Name,Phone,Status\n"; 
+            members.forEach(m => csv += `${m.id},"${m.name}",${m.phone},${getStatusAndUnpaid(m).status}\n`); 
+            const link = document.createElement('a'); 
+            link.href = encodeURI(csv); 
+            link.download = "report.csv"; 
+            link.click(); 
+            showToast("Report Downloaded");
+        }
+        
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    </script>
+</body>
+</html>
